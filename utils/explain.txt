@@ -1,0 +1,8 @@
+bandinfo_residual.py the one we used in submission, wrong version.
+
+Resizeentropy_safe.py, Resizeentropy_safe_bandinfo.py are the one retrivaled from Chi's telegram
+
+Resizeentropy_safe_bandinfo_optimized_dp.py apr 13 2026 chatgpt, max(Hk​−Hk−1​,0)Nk
+
+rim_exact.py apr 13 2026 chatgpt, H(Y≤f+Δf​−Y≤f​)Nf2​
+ 

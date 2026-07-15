@@ -1,0 +1,1405 @@
+--- RIM/thirdparty/torch_ngp/gridencoder/grid.py
++++ RIM/thirdparty/torch_ngp/gridencoder/grid.py
+@@ -1,159 +1,186 @@
+-import numpy as np
+-
+-import torch
+-import torch.nn as nn
+-from torch.autograd import Function
+-from torch.autograd.function import once_differentiable
+-from torch.cuda.amp import custom_bwd, custom_fwd 
+-
+-try:
+-    import _gridencoder as _backend
+-except ImportError:
+-    from .backend import _backend
+-
+-_gridtype_to_id = {
+-    'hash': 0,
+-    'tiled': 1,
+-}
+-
+-class _grid_encode(Function):
+-    @staticmethod
+-    @custom_fwd
+-    def forward(ctx, inputs, embeddings, offsets, per_level_scale, base_resolution, calc_grad_inputs=False, gridtype=0, align_corners=False):
+-        # inputs: [B, D], float in [0, 1]
+-        # embeddings: [sO, C], float
+-        # offsets: [L + 1], int
+-        # RETURN: [B, F], float
+-
+-        inputs = inputs.contiguous()
+-
+-        B, D = inputs.shape # batch size, coord dim
+-        L = offsets.shape[0] - 1 # level
+-        C = embeddings.shape[1] # embedding dim for each level
+-        S = np.log2(per_level_scale) # resolution multiplier at each level, apply log2 for later CUDA exp2f
+-        H = base_resolution # base resolution
+-
+-        # manually handle autocast (only use half precision embeddings, inputs must be float for enough precision)
+-        # if C % 2 != 0, force float, since half for atomicAdd is very slow.
+-        if torch.is_autocast_enabled() and C % 2 == 0:
+-            embeddings = embeddings.to(torch.half)
+-
+-        # L first, optimize cache for cuda kernel, but needs an extra permute later
+-        outputs = torch.empty(L, B, C, device=inputs.device, dtype=embeddings.dtype)
+-
+-        if calc_grad_inputs:
+-            dy_dx = torch.empty(B, L * D * C, device=inputs.device, dtype=embeddings.dtype)
+-        else:
+-            dy_dx = None
+-
+-        _backend.grid_encode_forward(inputs, embeddings, offsets, outputs, B, D, C, L, S, H, dy_dx, gridtype, align_corners)
+-
+-        # permute back to [B, L * C]
+-        outputs = outputs.permute(1, 0, 2).reshape(B, L * C)
+-
+-        ctx.save_for_backward(inputs, embeddings, offsets, dy_dx)
+-        ctx.dims = [B, D, C, L, S, H, gridtype]
+-        ctx.align_corners = align_corners
+-
+-        return outputs
+-    
+-    @staticmethod
+-    #@once_differentiable
+-    @custom_bwd
+-    def backward(ctx, grad):
+-
+-        inputs, embeddings, offsets, dy_dx = ctx.saved_tensors
+-        B, D, C, L, S, H, gridtype = ctx.dims
+-        align_corners = ctx.align_corners
+-
+-        # grad: [B, L * C] --> [L, B, C]
+-        grad = grad.view(B, L, C).permute(1, 0, 2).contiguous()
+-
+-        grad_embeddings = torch.zeros_like(embeddings)
+-
+-        if dy_dx is not None:
+-            grad_inputs = torch.zeros_like(inputs, dtype=embeddings.dtype)
+-        else:
+-            grad_inputs = None
+-
+-        _backend.grid_encode_backward(grad, inputs, embeddings, offsets, grad_embeddings, B, D, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners)
+-
+-        if dy_dx is not None:
+-            grad_inputs = grad_inputs.to(inputs.dtype)
+-
+-        return grad_inputs, grad_embeddings, None, None, None, None, None, None
+-        
+-
+-
+-grid_encode = _grid_encode.apply
+-
+-
+-class GridEncoder(nn.Module):
+-    def __init__(self, input_dim=3, num_levels=16, level_dim=2, per_level_scale=2, base_resolution=16, log2_hashmap_size=19, desired_resolution=None, gridtype='hash', align_corners=False, allocate_params=True,
+-    levels_omit=[]):
+-        super().__init__()
+-
+-        # the finest resolution desired at the last level, if provided, overridee per_level_scale
+-        if desired_resolution is not None and num_levels > 1:
+-            per_level_scale = np.exp2(np.log2(desired_resolution / base_resolution) / (num_levels - 1))
+-
+-        self.input_dim = input_dim # coord dims, 2 or 3
+-        self.num_levels = num_levels # num levels, each level multiply resolution by 2
+-        self.level_dim = level_dim # encode channels per level
+-        self.per_level_scale = per_level_scale # multiply resolution by this scale at each level.
+-        self.log2_hashmap_size = log2_hashmap_size
+-        self.base_resolution = base_resolution
+-        self.gridtype = gridtype
+-        self.gridtype_id = _gridtype_to_id[gridtype] # "tiled" or "hash"
+-        self.align_corners = align_corners
+-
+-        channels_keep = []
+-        for i in range(num_levels):
+-            if i not in levels_omit:
+-                channels_keep += [i*level_dim+x for x in range(level_dim)]
+-        channels_keep = torch.tensor(channels_keep, dtype=torch.long)
+-        self.register_buffer('channels_keep', channels_keep)
+-        self.output_dim_orig = num_levels * level_dim
+-        self.output_dim = channels_keep.shape[0]
+-
+-        # allocate parameters
+-        offsets = []
+-        offset = 0
+-        self.max_params = 2 ** log2_hashmap_size
+-        for i in range(num_levels):
+-            resolution = int(np.ceil(base_resolution * per_level_scale ** i))
+-            params_in_level = min(self.max_params, (resolution if align_corners else resolution + 1) ** input_dim) # limit max number
+-            params_in_level = int(np.ceil(params_in_level / 8) * 8) # make divisible
+-            offsets.append(offset)
+-            offset += params_in_level
+-        offsets.append(offset)
+-        offsets = torch.from_numpy(np.array(offsets, dtype=np.int32))
+-        self.register_buffer('offsets', offsets)
+-        
+-        self.n_params = offsets[-1] * level_dim
+-
+-        # parameters
+-        if allocate_params:
+-            self.embeddings = nn.Parameter(torch.empty(offset, level_dim))
+-            self.reset_parameters()
+-    
+-    def reset_parameters(self):
+-        std = 1e-4
+-        self.embeddings.data.uniform_(-std, std)
+-
+-    def __repr__(self):
+-        return f"GridEncoder: input_dim={self.input_dim} num_levels={self.num_levels} level_dim={self.level_dim} resolution={self.base_resolution} -> {int(round(self.base_resolution * self.per_level_scale ** (self.num_levels - 1)))} hashmap_size=2^{self.log2_hashmap_size} per_level_scale={self.per_level_scale:.4f} params={tuple(self.embeddings.shape)} gridtype={self.gridtype} align_corners={self.align_corners}"
+-    
+-    def forward(self, inputs, bound=1):
+-        # inputs: [..., input_dim], normalized real world positions in [-bound, bound]
+-        # return: [..., num_levels * level_dim]
+-
+-        inputs = (inputs + bound) / (2 * bound) # map to [0, 1]
+-
+-        prefix_shape = list(inputs.shape[:-1])
+-        inputs = inputs.view(-1, self.input_dim)
+-
+-        outputs = grid_encode(inputs, self.embeddings, self.offsets, self.per_level_scale, self.base_resolution, inputs.requires_grad, self.gridtype_id, self.align_corners)
+-        outputs = outputs.view(prefix_shape + [self.output_dim_orig])
+-
+-        return outputs[..., self.channels_keep]
++import numpy as np
++
++import torch
++import torch.nn as nn
++from torch.autograd import Function
++from torch.autograd.function import once_differentiable
++from torch.cuda.amp import custom_bwd, custom_fwd 
++
++try:
++    import _gridencoder as _backend
++except ImportError:
++    from .backend import _backend
++
++_gridtype_to_id = {
++    'hash': 0,
++    'tiled': 1,
++}
++
++class _grid_encode(Function):
++    @staticmethod
++    @custom_fwd
++    def forward(ctx, inputs, embeddings, offsets, per_level_scale, base_resolution, calc_grad_inputs=False, gridtype=0, align_corners=False, resolutions=None):
++        # inputs: [B, D], float in [0, 1]
++        # embeddings: [sO, C], float
++        # offsets: [L + 1], int
++        # resolutions: [L], int (optional). If provided (numel > 0), overrides geometric resolution schedule.
++        # RETURN: [B, F], float
++
++        inputs = inputs.contiguous()
++
++        B, D = inputs.shape # batch size, coord dim
++        L = offsets.shape[0] - 1 # level
++        C = embeddings.shape[1] # embedding dim for each level
++        S = np.log2(per_level_scale) # resolution multiplier at each level, apply log2 for later CUDA exp2f
++        H = base_resolution # base resolution
++
++        # manually handle autocast (only use half precision embeddings, inputs must be float for enough precision)
++        # if C % 2 != 0, force float, since half for atomicAdd is very slow.
++        if torch.is_autocast_enabled() and C % 2 == 0:
++            embeddings = embeddings.to(torch.half)
++
++        # L first, optimize cache for cuda kernel, but needs an extra permute later
++        outputs = torch.empty(L, B, C, device=inputs.device, dtype=embeddings.dtype)
++
++        if calc_grad_inputs:
++            dy_dx = torch.empty(B, L * D * C, device=inputs.device, dtype=embeddings.dtype)
++        else:
++            dy_dx = None
++
++        if resolutions is None:
++            resolutions = torch.empty(0, device=inputs.device, dtype=torch.int32)
++        else:
++            # ensure device/dtype match extension expectations
++            if resolutions.dtype != torch.int32:
++                resolutions = resolutions.to(torch.int32)
++            if resolutions.device != inputs.device:
++                resolutions = resolutions.to(device=inputs.device)
++            resolutions = resolutions.contiguous()
++
++        _backend.grid_encode_forward(inputs, embeddings, offsets, outputs, B, D, C, L, S, H, dy_dx, gridtype, align_corners, resolutions)
++
++        # permute back to [B, L * C]
++        outputs = outputs.permute(1, 0, 2).reshape(B, L * C)
++
++        ctx.save_for_backward(inputs, embeddings, offsets, dy_dx, resolutions)
++        ctx.dims = [B, D, C, L, S, H, gridtype]
++        ctx.align_corners = align_corners
++
++        return outputs
++    
++    @staticmethod
++    #@once_differentiable
++    @custom_bwd
++    def backward(ctx, grad):
++
++        inputs, embeddings, offsets, dy_dx, resolutions = ctx.saved_tensors
++        B, D, C, L, S, H, gridtype = ctx.dims
++        align_corners = ctx.align_corners
++
++        # grad: [B, L * C] --> [L, B, C]
++        grad = grad.view(B, L, C).permute(1, 0, 2).contiguous()
++
++        grad_embeddings = torch.zeros_like(embeddings)
++
++        if dy_dx is not None:
++            grad_inputs = torch.zeros_like(inputs, dtype=embeddings.dtype)
++        else:
++            grad_inputs = None
++
++        _backend.grid_encode_backward(grad, inputs, embeddings, offsets, grad_embeddings, B, D, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners, resolutions)
++
++        if dy_dx is not None:
++            grad_inputs = grad_inputs.to(inputs.dtype)
++
++        return grad_inputs, grad_embeddings, None, None, None, None, None, None, None
++        
++
++
++grid_encode = _grid_encode.apply
++
++
++class GridEncoder(nn.Module):
++    def __init__(self, input_dim=3, num_levels=16, level_dim=2, per_level_scale=2, base_resolution=16, log2_hashmap_size=19, desired_resolution=None, gridtype='hash', align_corners=False, allocate_params=True,
++    levels_omit=[], resolutions=None):
++        super().__init__()
++
++        # the finest resolution desired at the last level, if provided, overridee per_level_scale
++        if desired_resolution is not None and num_levels > 1:
++            per_level_scale = np.exp2(np.log2(desired_resolution / base_resolution) / (num_levels - 1))
++
++        self.input_dim = input_dim # coord dims, 2 or 3
++        # If explicit per-level resolutions are provided, they override the geometric schedule.
++        if resolutions is not None:
++            resolutions = [int(r) for r in resolutions]
++            num_levels = len(resolutions)
++            self.register_buffer('resolutions', torch.tensor(resolutions, dtype=torch.int32))
++        else:
++            self.register_buffer('resolutions', torch.empty(0, dtype=torch.int32))
++
++        self.num_levels = num_levels # num levels
++        self.level_dim = level_dim # encode channels per level
++        self.per_level_scale = per_level_scale # multiply resolution by this scale at each level.
++        self.log2_hashmap_size = log2_hashmap_size
++        self.base_resolution = base_resolution
++        self.gridtype = gridtype
++        self.gridtype_id = _gridtype_to_id[gridtype] # "tiled" or "hash"
++        self.align_corners = align_corners
++
++        channels_keep = []
++        for i in range(num_levels):
++            if i not in levels_omit:
++                channels_keep += [i*level_dim+x for x in range(level_dim)]
++        channels_keep = torch.tensor(channels_keep, dtype=torch.long)
++        self.register_buffer('channels_keep', channels_keep)
++        self.output_dim_orig = num_levels * level_dim
++        self.output_dim = channels_keep.shape[0]
++
++        # allocate parameters
++        offsets = []
++        offset = 0
++        self.max_params = 2 ** log2_hashmap_size
++        for i in range(num_levels):
++            if self.resolutions.numel() > 0:
++                resolution = int(self.resolutions[i].item())
++            else:
++                resolution = int(np.ceil(base_resolution * per_level_scale ** i))
++            params_in_level = min(self.max_params, (resolution if align_corners else resolution + 1) ** input_dim) # limit max number
++            params_in_level = int(np.ceil(params_in_level / 8) * 8) # make divisible
++            offsets.append(offset)
++            offset += params_in_level
++        offsets.append(offset)
++        offsets = torch.from_numpy(np.array(offsets, dtype=np.int32))
++        self.register_buffer('offsets', offsets)
++        
++        self.n_params = offsets[-1] * level_dim
++
++        # parameters
++        if allocate_params:
++            self.embeddings = nn.Parameter(torch.empty(offset, level_dim))
++            self.reset_parameters()
++    
++    def reset_parameters(self):
++        std = 1e-4
++        self.embeddings.data.uniform_(-std, std)
++
++    def __repr__(self):
++        if self.resolutions.numel() > 0:
++            r0 = int(self.resolutions[0].item())
++            r1 = int(self.resolutions[-1].item())
++            return f"GridEncoder: input_dim={self.input_dim} num_levels={self.num_levels} level_dim={self.level_dim} resolution(custom)={r0} -> {r1} hashmap_size=2^{self.log2_hashmap_size} params={tuple(self.embeddings.shape)} gridtype={self.gridtype} align_corners={self.align_corners}"
++        return f"GridEncoder: input_dim={self.input_dim} num_levels={self.num_levels} level_dim={self.level_dim} resolution={self.base_resolution} -> {int(round(self.base_resolution * self.per_level_scale ** (self.num_levels - 1)))} hashmap_size=2^{self.log2_hashmap_size} per_level_scale={self.per_level_scale:.4f} params={tuple(self.embeddings.shape)} gridtype={self.gridtype} align_corners={self.align_corners}"
++    
++    def forward(self, inputs, bound=1):
++        # inputs: [..., input_dim], normalized real world positions in [-bound, bound]
++        # return: [..., num_levels * level_dim]
++
++        inputs = (inputs + bound) / (2 * bound) # map to [0, 1]
++
++        prefix_shape = list(inputs.shape[:-1])
++        inputs = inputs.view(-1, self.input_dim)
++
++        # NOTE: self.resolutions is a registered buffer. If empty, CUDA kernel falls back to geometric schedule.
++        outputs = grid_encode(inputs, self.embeddings, self.offsets, self.per_level_scale, self.base_resolution, inputs.requires_grad, self.gridtype_id, self.align_corners, self.resolutions)
++        outputs = outputs.view(prefix_shape + [self.output_dim_orig])
++
++        return outputs[..., self.channels_keep]
+--- ECCV2026_giga_efficient/thirdparty/torch_ngp/gridencoder/src/gridencoder.h
++++ ECCV2026_giga_efficient/thirdparty/torch_ngp/gridencoder/src/gridencoder.h
+@@ -1,15 +1,26 @@
+-#ifndef _HASH_ENCODE_H
+-#define _HASH_ENCODE_H
+-
+-#include <stdint.h>
+-#include <torch/torch.h>
+-
+-// inputs: [B, D], float, in [0, 1]
+-// embeddings: [sO, C], float
+-// offsets: [L + 1], uint32_t
+-// outputs: [B, L * C], float
+-// H: base resolution
+-void grid_encode_forward(const at::Tensor inputs, const at::Tensor embeddings, const at::Tensor offsets, at::Tensor outputs, const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L, const float S, const uint32_t H, at::optional<at::Tensor> dy_dx, const uint32_t gridtype, const bool align_corners);
+-void grid_encode_backward(const at::Tensor grad, const at::Tensor inputs, const at::Tensor embeddings, const at::Tensor offsets, at::Tensor grad_embeddings, const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L, const float S, const uint32_t H, const at::optional<at::Tensor> dy_dx, at::optional<at::Tensor> grad_inputs, const uint32_t gridtype, const bool align_corners);
+-
++#ifndef _HASH_ENCODE_H
++#define _HASH_ENCODE_H
++
++#include <stdint.h>
++#include <torch/torch.h>
++
++// inputs: [B, D], float, in [0, 1]
++// embeddings: [sO, C], float
++// offsets: [L + 1], uint32_t
++// outputs: [B, L * C], float
++// H: base resolution
++// resolutions: [L] int32 on CUDA. If resolutions.numel() == 0, use geometric schedule defined by (S, H).
++void grid_encode_forward(const at::Tensor inputs, const at::Tensor embeddings, const at::Tensor offsets, at::Tensor outputs,
++                         const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L,
++                         const float S, const uint32_t H, at::optional<at::Tensor> dy_dx,
++                         const uint32_t gridtype, const bool align_corners,
++                         const at::Tensor resolutions);
++void grid_encode_backward(const at::Tensor grad, const at::Tensor inputs, const at::Tensor embeddings, const at::Tensor offsets,
++                          at::Tensor grad_embeddings,
++                          const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L,
++                          const float S, const uint32_t H,
++                          const at::optional<at::Tensor> dy_dx, at::optional<at::Tensor> grad_inputs,
++                          const uint32_t gridtype, const bool align_corners,
++                          const at::Tensor resolutions);
++
+ #endif
+\ No newline at end of file
+--- ECCV2026_giga_efficient/thirdparty/torch_ngp/gridencoder/src/gridencoder.cu
++++ ECCV2026_giga_efficient/thirdparty/torch_ngp/gridencoder/src/gridencoder.cu
+@@ -1,479 +1,531 @@
+-#include <cuda.h>
+-#include <cuda_fp16.h>
+-#include <cuda_runtime.h>
+-
+-#include <ATen/cuda/CUDAContext.h>
+-#include <torch/torch.h>
+-
+-#include <algorithm>
+-#include <stdexcept>
+-
+-#include <stdint.h>
+-#include <cstdio>
+-
+-
+-#define CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x " must be a CUDA tensor")
+-#define CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x " must be a contiguous tensor")
+-#define CHECK_IS_INT(x) TORCH_CHECK(x.scalar_type() == at::ScalarType::Int, #x " must be an int tensor")
+-#define CHECK_IS_FLOATING(x) TORCH_CHECK(x.scalar_type() == at::ScalarType::Float || x.scalar_type() == at::ScalarType::Half || x.scalar_type() == at::ScalarType::Double, #x " must be a floating tensor")
+-
+-
+-// just for compatability of half precision in AT_DISPATCH_FLOATING_TYPES_AND_HALF...
+-static inline  __device__ at::Half atomicAdd(at::Half *address, at::Half val) {
+-  // requires CUDA >= 10 and ARCH >= 70
+-  // this is very slow compared to float or __half2, and never used.
+-  //return atomicAdd(reinterpret_cast<__half*>(address), val);
+-}
+-
+-
+-template <typename T>
+-static inline __host__ __device__ T div_round_up(T val, T divisor) {
+-    return (val + divisor - 1) / divisor;
+-}
+-
+-
+-template <uint32_t D>
+-__device__ uint32_t fast_hash(const uint32_t pos_grid[D]) {
+-    static_assert(D <= 7, "fast_hash can only hash up to 7 dimensions.");
+-
+-    // While 1 is technically not a good prime for hashing (or a prime at all), it helps memory coherence
+-    // and is sufficient for our use case of obtaining a uniformly colliding index from high-dimensional
+-    // coordinates.
+-    constexpr uint32_t primes[7] = { 1, 2654435761, 805459861, 3674653429, 2097192037, 1434869437, 2165219737 };
+-
+-    uint32_t result = 0;
+-    #pragma unroll
+-    for (uint32_t i = 0; i < D; ++i) {
+-        result ^= pos_grid[i] * primes[i];
+-    }
+-
+-    return result;
+-}
+-
+-
+-template <uint32_t D, uint32_t C>
+-__device__ uint32_t get_grid_index(const uint32_t gridtype, const bool align_corners, const uint32_t ch, const uint32_t hashmap_size, const uint32_t resolution, const uint32_t pos_grid[D]) {
+-    uint32_t stride = 1;
+-    uint32_t index = 0;
+-
+-    #pragma unroll
+-    for (uint32_t d = 0; d < D && stride <= hashmap_size; d++) {
+-        index += pos_grid[d] * stride;
+-        stride *= align_corners ? resolution: (resolution + 1);
+-    }
+-
+-    // NOTE: for NeRF, the hash is in fact not necessary. Check https://github.com/NVlabs/instant-ngp/issues/97.
+-    // gridtype: 0 == hash, 1 == tiled
+-    if (gridtype == 0 && stride > hashmap_size) {
+-        index = fast_hash<D>(pos_grid);
+-    }
+-
+-    return (index % hashmap_size) * C + ch;
+-}
+-
+-
+-template <typename scalar_t, uint32_t D, uint32_t C>
+-__global__ void kernel_grid(
+-    const float * __restrict__ inputs, 
+-    const scalar_t * __restrict__ grid, 
+-    const int * __restrict__ offsets, 
+-    scalar_t * __restrict__ outputs, 
+-    const uint32_t B, const uint32_t L, const float S, const uint32_t H,
+-    scalar_t * __restrict__ dy_dx,
+-    const uint32_t gridtype,
+-    const bool align_corners
+-) {
+-    const uint32_t b = blockIdx.x * blockDim.x + threadIdx.x;
+-    
+-    if (b >= B) return;
+-
+-    const uint32_t level = blockIdx.y;
+-    
+-    // locate
+-    grid += (uint32_t)offsets[level] * C;
+-    inputs += b * D;
+-    outputs += level * B * C + b * C;
+-
+-    // check input range (should be in [0, 1])
+-    bool flag_oob = false;
+-    #pragma unroll
+-    for (uint32_t d = 0; d < D; d++) {
+-        if (inputs[d] < 0 || inputs[d] > 1) {
+-            flag_oob = true;
+-        }
+-    }
+-    // if input out of bound, just set output to 0
+-    if (flag_oob) {
+-        #pragma unroll
+-        for (uint32_t ch = 0; ch < C; ch++) {
+-            outputs[ch] = 0; 
+-        }
+-        if (dy_dx) {
+-            dy_dx += b * D * L * C + level * D * C; // B L D C
+-            #pragma unroll
+-            for (uint32_t d = 0; d < D; d++) {
+-                #pragma unroll
+-                for (uint32_t ch = 0; ch < C; ch++) {
+-                    dy_dx[d * C + ch] = 0; 
+-                }       
+-            }
+-        }
+-        return;
+-    }
+-
+-    const uint32_t hashmap_size = offsets[level + 1] - offsets[level];
+-    const float scale = exp2f(level * S) * H - 1.0f;
+-    const uint32_t resolution = (uint32_t)ceil(scale) + 1;
+-    
+-    // calculate coordinate
+-    float pos[D];
+-    uint32_t pos_grid[D];
+-
+-    #pragma unroll
+-    for (uint32_t d = 0; d < D; d++) {
+-        pos[d] = inputs[d] * scale + (align_corners ? 0.0f : 0.5f);
+-        pos_grid[d] = floorf(pos[d]);
+-        pos[d] -= (float)pos_grid[d];
+-    }
+-
+-    //printf("[b=%d, l=%d] pos=(%f, %f)+(%d, %d)\n", b, level, pos[0], pos[1], pos_grid[0], pos_grid[1]);
+-
+-    // interpolate
+-    scalar_t results[C] = {0}; // temp results in register
+-
+-    #pragma unroll
+-    for (uint32_t idx = 0; idx < (1 << D); idx++) {
+-        float w = 1;
+-        uint32_t pos_grid_local[D];
+-
+-        #pragma unroll
+-        for (uint32_t d = 0; d < D; d++) {
+-            if ((idx & (1 << d)) == 0) {
+-                w *= 1 - pos[d];
+-                pos_grid_local[d] = pos_grid[d];
+-            } else {
+-                w *= pos[d];
+-                pos_grid_local[d] = pos_grid[d] + 1;
+-            }
+-        }
+-
+-        uint32_t index = get_grid_index<D, C>(gridtype, align_corners, 0, hashmap_size, resolution, pos_grid_local);
+-
+-        // writing to register (fast)
+-        #pragma unroll
+-        for (uint32_t ch = 0; ch < C; ch++) {
+-            results[ch] += w * grid[index + ch];
+-        }
+-
+-        //printf("[b=%d, l=%d] int %d, idx %d, w %f, val %f\n", b, level, idx, index, w, grid[index]);
+-    }    
+-
+-    // writing to global memory (slow)
+-    #pragma unroll
+-    for (uint32_t ch = 0; ch < C; ch++) {
+-        outputs[ch] = results[ch]; 
+-    }
+-
+-    // prepare dy_dx
+-    // differentiable (soft) indexing: https://discuss.pytorch.org/t/differentiable-indexing/17647/9
+-    if (dy_dx) {
+-
+-        dy_dx += b * D * L * C + level * D * C; // B L D C
+-
+-        #pragma unroll
+-        for (uint32_t gd = 0; gd < D; gd++) {
+-
+-            scalar_t results_grad[C] = {0};
+-
+-            #pragma unroll
+-            for (uint32_t idx = 0; idx < (1 << (D - 1)); idx++) {
+-                float w = scale;
+-                uint32_t pos_grid_local[D];
+-
+-                #pragma unroll
+-                for (uint32_t nd = 0; nd < D - 1; nd++) {
+-                    const uint32_t d = (nd >= gd) ? (nd + 1) : nd;
+-
+-                    if ((idx & (1 << nd)) == 0) {
+-                        w *= 1 - pos[d];
+-                        pos_grid_local[d] = pos_grid[d];
+-                    } else {
+-                        w *= pos[d];
+-                        pos_grid_local[d] = pos_grid[d] + 1;
+-                    }
+-                }
+-
+-                pos_grid_local[gd] = pos_grid[gd];
+-                uint32_t index_left = get_grid_index<D, C>(gridtype, align_corners, 0, hashmap_size, resolution, pos_grid_local);
+-                pos_grid_local[gd] = pos_grid[gd] + 1;
+-                uint32_t index_right = get_grid_index<D, C>(gridtype, align_corners, 0, hashmap_size, resolution, pos_grid_local);
+-
+-                #pragma unroll
+-                for (uint32_t ch = 0; ch < C; ch++) {
+-                    results_grad[ch] += w * (grid[index_right + ch] - grid[index_left + ch]);
+-                }
+-            }
+-
+-            #pragma unroll
+-            for (uint32_t ch = 0; ch < C; ch++) {
+-                dy_dx[gd * C + ch] = results_grad[ch];
+-            }
+-        }
+-    }
+-}
+-
+-
+-template <typename scalar_t, uint32_t D, uint32_t C, uint32_t N_C>
+-__global__ void kernel_grid_backward(
+-    const scalar_t * __restrict__ grad,
+-    const float * __restrict__ inputs, 
+-    const scalar_t * __restrict__ grid, 
+-    const int * __restrict__ offsets, 
+-    scalar_t * __restrict__ grad_grid, 
+-    const uint32_t B, const uint32_t L, const float S, const uint32_t H,
+-    const uint32_t gridtype,
+-    const bool align_corners
+-) {
+-    const uint32_t b = (blockIdx.x * blockDim.x + threadIdx.x) * N_C / C;
+-    if (b >= B) return;
+-
+-    const uint32_t level = blockIdx.y;
+-    const uint32_t ch = (blockIdx.x * blockDim.x + threadIdx.x) * N_C - b * C;
+-
+-    // locate
+-    grad_grid += offsets[level] * C;
+-    inputs += b * D;
+-    grad += level * B * C + b * C + ch; // L, B, C
+-
+-    const uint32_t hashmap_size = offsets[level + 1] - offsets[level];
+-    const float scale = exp2f(level * S) * H - 1.0f;
+-    const uint32_t resolution = (uint32_t)ceil(scale) + 1;
+-
+-    // check input range (should be in [0, 1])
+-    #pragma unroll
+-    for (uint32_t d = 0; d < D; d++) {
+-        if (inputs[d] < 0 || inputs[d] > 1) {
+-            return; // grad is init as 0, so we simply return.
+-        }
+-    }
+-
+-    // calculate coordinate
+-    float pos[D];
+-    uint32_t pos_grid[D];
+-
+-    #pragma unroll
+-    for (uint32_t d = 0; d < D; d++) {
+-        pos[d] = inputs[d] * scale + (align_corners ? 0.0f : 0.5f);
+-        pos_grid[d] = floorf(pos[d]);
+-        pos[d] -= (float)pos_grid[d];
+-    }
+-
+-    scalar_t grad_cur[N_C] = {0}; // fetch to register
+-    #pragma unroll
+-    for (uint32_t c = 0; c < N_C; c++) {
+-        grad_cur[c] = grad[c];
+-    }
+-
+-    // interpolate
+-    #pragma unroll
+-    for (uint32_t idx = 0; idx < (1 << D); idx++) {
+-        float w = 1;
+-        uint32_t pos_grid_local[D];
+-
+-        #pragma unroll
+-        for (uint32_t d = 0; d < D; d++) {
+-            if ((idx & (1 << d)) == 0) {
+-                w *= 1 - pos[d];
+-                pos_grid_local[d] = pos_grid[d];
+-            } else {
+-                w *= pos[d];
+-                pos_grid_local[d] = pos_grid[d] + 1;
+-            }
+-        }
+-
+-        uint32_t index = get_grid_index<D, C>(gridtype, align_corners, ch, hashmap_size, resolution, pos_grid_local);
+-
+-        // atomicAdd for __half is slow (especially for large values), so we use __half2 if N_C % 2 == 0
+-        // TODO: use float which is better than __half, if N_C % 2 != 0
+-        if (std::is_same<scalar_t, at::Half>::value && N_C % 2 == 0) {
+-            #pragma unroll
+-            for (uint32_t c = 0; c < N_C; c += 2) {
+-                // process two __half at once (by interpreting as a __half2)
+-                __half2 v = {(__half)(w * grad_cur[c]), (__half)(w * grad_cur[c + 1])};
+-                atomicAdd((__half2*)&grad_grid[index + c], v);
+-            }
+-        // float, or __half when N_C % 2 != 0 (which means C == 1)
+-        } else {
+-            #pragma unroll
+-            for (uint32_t c = 0; c < N_C; c++) {
+-                atomicAdd(&grad_grid[index + c], w * grad_cur[c]);
+-            }
+-        }
+-    }    
+-}
+-
+-
+-template <typename scalar_t, uint32_t D, uint32_t C>
+-__global__ void kernel_input_backward(
+-    const scalar_t * __restrict__ grad,
+-    const scalar_t * __restrict__ dy_dx,  
+-    scalar_t * __restrict__ grad_inputs, 
+-    uint32_t B, uint32_t L
+-) {
+-    const uint32_t t = threadIdx.x + blockIdx.x * blockDim.x;
+-    if (t >= B * D) return;
+-
+-    const uint32_t b = t / D;
+-    const uint32_t d = t - b * D;
+-
+-    dy_dx += b * L * D * C;
+-
+-    scalar_t result = 0;
+-    
+-    # pragma unroll
+-    for (int l = 0; l < L; l++) {
+-        # pragma unroll
+-        for (int ch = 0; ch < C; ch++) {
+-            result += grad[l * B * C + b * C + ch] * dy_dx[l * D * C + d * C + ch];
+-        }
+-    }
+-
+-    grad_inputs[t] = result;
+-}
+-
+-
+-template <typename scalar_t, uint32_t D>
+-void kernel_grid_wrapper(const float *inputs, const scalar_t *embeddings, const int *offsets, scalar_t *outputs, const uint32_t B, const uint32_t C, const uint32_t L, const float S, const uint32_t H, scalar_t *dy_dx, const uint32_t gridtype, const bool align_corners) {
+-    static constexpr uint32_t N_THREAD = 512;
+-    const dim3 blocks_hashgrid = { div_round_up(B, N_THREAD), L, 1 };
+-    switch (C) {
+-        case 1: kernel_grid<scalar_t, D, 1><<<blocks_hashgrid, N_THREAD>>>(inputs, embeddings, offsets, outputs, B, L, S, H, dy_dx, gridtype, align_corners); break;
+-        case 2: kernel_grid<scalar_t, D, 2><<<blocks_hashgrid, N_THREAD>>>(inputs, embeddings, offsets, outputs, B, L, S, H, dy_dx, gridtype, align_corners); break;
+-        case 4: kernel_grid<scalar_t, D, 4><<<blocks_hashgrid, N_THREAD>>>(inputs, embeddings, offsets, outputs, B, L, S, H, dy_dx, gridtype, align_corners); break;
+-        case 8: kernel_grid<scalar_t, D, 8><<<blocks_hashgrid, N_THREAD>>>(inputs, embeddings, offsets, outputs, B, L, S, H, dy_dx, gridtype, align_corners); break;
+-        default: throw std::runtime_error{"GridEncoding: C must be 1, 2, 4, or 8."};
+-    }
+-}
+-
+-// inputs: [B, D], float, in [0, 1]
+-// embeddings: [sO, C], float
+-// offsets: [L + 1], uint32_t
+-// outputs: [L, B, C], float (L first, so only one level of hashmap needs to fit into cache at a time.)
+-// H: base resolution
+-// dy_dx: [B, L * D * C]
+-template <typename scalar_t>
+-void grid_encode_forward_cuda(const float *inputs, const scalar_t *embeddings, const int *offsets, scalar_t *outputs, const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L, const float S, const uint32_t H, scalar_t *dy_dx, const uint32_t gridtype, const bool align_corners) {
+-    switch (D) {
+-        case 1: kernel_grid_wrapper<scalar_t, 1>(inputs, embeddings, offsets, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
+-        case 2: kernel_grid_wrapper<scalar_t, 2>(inputs, embeddings, offsets, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
+-        case 3: kernel_grid_wrapper<scalar_t, 3>(inputs, embeddings, offsets, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
+-        case 4: kernel_grid_wrapper<scalar_t, 4>(inputs, embeddings, offsets, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
+-        case 5: kernel_grid_wrapper<scalar_t, 5>(inputs, embeddings, offsets, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
+-        default: throw std::runtime_error{"GridEncoding: D must be 1, 2, 3, 4, or 5."};
+-    }
+-    
+-}
+-
+-template <typename scalar_t, uint32_t D>
+-void kernel_grid_backward_wrapper(const scalar_t *grad, const float *inputs, const scalar_t *embeddings, const int *offsets, scalar_t *grad_embeddings, const uint32_t B, const uint32_t C, const uint32_t L, const float S, const uint32_t H, scalar_t *dy_dx, scalar_t *grad_inputs, const uint32_t gridtype, const bool align_corners) {
+-    static constexpr uint32_t N_THREAD = 256;
+-    const uint32_t N_C = std::min(2u, C); // n_features_per_thread
+-    const dim3 blocks_hashgrid = { div_round_up(B * C / N_C, N_THREAD), L, 1 };
+-    switch (C) {
+-        case 1: 
+-            kernel_grid_backward<scalar_t, D, 1, 1><<<blocks_hashgrid, N_THREAD>>>(grad, inputs, embeddings, offsets, grad_embeddings, B, L, S, H, gridtype, align_corners); 
+-            if (dy_dx) kernel_input_backward<scalar_t, D, 1><<<div_round_up(B * D, N_THREAD), N_THREAD>>>(grad, dy_dx, grad_inputs, B, L);
+-            break;
+-        case 2: 
+-            kernel_grid_backward<scalar_t, D, 2, 2><<<blocks_hashgrid, N_THREAD>>>(grad, inputs, embeddings, offsets, grad_embeddings, B, L, S, H, gridtype, align_corners);
+-            if (dy_dx) kernel_input_backward<scalar_t, D, 2><<<div_round_up(B * D, N_THREAD), N_THREAD>>>(grad, dy_dx, grad_inputs, B, L);
+-            break;
+-        case 4: 
+-            kernel_grid_backward<scalar_t, D, 4, 2><<<blocks_hashgrid, N_THREAD>>>(grad, inputs, embeddings, offsets, grad_embeddings, B, L, S, H, gridtype, align_corners);
+-            if (dy_dx) kernel_input_backward<scalar_t, D, 4><<<div_round_up(B * D, N_THREAD), N_THREAD>>>(grad, dy_dx, grad_inputs, B, L);
+-            break;
+-        case 8: 
+-            kernel_grid_backward<scalar_t, D, 8, 2><<<blocks_hashgrid, N_THREAD>>>(grad, inputs, embeddings, offsets, grad_embeddings, B, L, S, H, gridtype, align_corners);
+-            if (dy_dx) kernel_input_backward<scalar_t, D, 8><<<div_round_up(B * D, N_THREAD), N_THREAD>>>(grad, dy_dx, grad_inputs, B, L);
+-            break;
+-        default: throw std::runtime_error{"GridEncoding: C must be 1, 2, 4, or 8."};
+-    }
+-}
+-
+-
+-// grad: [L, B, C], float
+-// inputs: [B, D], float, in [0, 1]
+-// embeddings: [sO, C], float
+-// offsets: [L + 1], uint32_t
+-// grad_embeddings: [sO, C]
+-// H: base resolution
+-template <typename scalar_t>
+-void grid_encode_backward_cuda(const scalar_t *grad, const float *inputs, const scalar_t *embeddings, const int *offsets, scalar_t *grad_embeddings, const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L, const float S, const uint32_t H, scalar_t *dy_dx, scalar_t *grad_inputs, const uint32_t gridtype, const bool align_corners) {
+-    switch (D) {
+-        case 1: kernel_grid_backward_wrapper<scalar_t, 1>(grad, inputs, embeddings, offsets, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
+-        case 2: kernel_grid_backward_wrapper<scalar_t, 2>(grad, inputs, embeddings, offsets, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
+-        case 3: kernel_grid_backward_wrapper<scalar_t, 3>(grad, inputs, embeddings, offsets, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
+-        case 4: kernel_grid_backward_wrapper<scalar_t, 4>(grad, inputs, embeddings, offsets, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
+-        case 5: kernel_grid_backward_wrapper<scalar_t, 5>(grad, inputs, embeddings, offsets, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
+-        default: throw std::runtime_error{"GridEncoding: D must be 1, 2, 3, 4, or 5."};
+-    }
+-}
+-
+-
+-
+-void grid_encode_forward(const at::Tensor inputs, const at::Tensor embeddings, const at::Tensor offsets, at::Tensor outputs, const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L, const float S, const uint32_t H, at::optional<at::Tensor> dy_dx, const uint32_t gridtype, const bool align_corners) {
+-    CHECK_CUDA(inputs);
+-    CHECK_CUDA(embeddings);
+-    CHECK_CUDA(offsets);
+-    CHECK_CUDA(outputs);
+-    // CHECK_CUDA(dy_dx);
+-    
+-    CHECK_CONTIGUOUS(inputs);
+-    CHECK_CONTIGUOUS(embeddings);
+-    CHECK_CONTIGUOUS(offsets);
+-    CHECK_CONTIGUOUS(outputs);
+-    // CHECK_CONTIGUOUS(dy_dx);
+-
+-    CHECK_IS_FLOATING(inputs);
+-    CHECK_IS_FLOATING(embeddings);
+-    CHECK_IS_INT(offsets);
+-    CHECK_IS_FLOATING(outputs);
+-    // CHECK_IS_FLOATING(dy_dx);
+-
+-    AT_DISPATCH_FLOATING_TYPES_AND_HALF(
+-    embeddings.scalar_type(), "grid_encode_forward", ([&] {
+-        grid_encode_forward_cuda<scalar_t>(inputs.data_ptr<float>(), embeddings.data_ptr<scalar_t>(), offsets.data_ptr<int>(), outputs.data_ptr<scalar_t>(), B, D, C, L, S, H, dy_dx.has_value() ? dy_dx.value().data_ptr<scalar_t>() : nullptr, gridtype, align_corners);
+-    }));
+-}
+-
+-void grid_encode_backward(const at::Tensor grad, const at::Tensor inputs, const at::Tensor embeddings, const at::Tensor offsets, at::Tensor grad_embeddings, const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L, const float S, const uint32_t H, const at::optional<at::Tensor> dy_dx, at::optional<at::Tensor> grad_inputs, const uint32_t gridtype, const bool align_corners) {
+-    CHECK_CUDA(grad);
+-    CHECK_CUDA(inputs);
+-    CHECK_CUDA(embeddings);
+-    CHECK_CUDA(offsets);
+-    CHECK_CUDA(grad_embeddings);
+-    // CHECK_CUDA(dy_dx);
+-    // CHECK_CUDA(grad_inputs);
+-    
+-    CHECK_CONTIGUOUS(grad);
+-    CHECK_CONTIGUOUS(inputs);
+-    CHECK_CONTIGUOUS(embeddings);
+-    CHECK_CONTIGUOUS(offsets);
+-    CHECK_CONTIGUOUS(grad_embeddings);
+-    // CHECK_CONTIGUOUS(dy_dx);
+-    // CHECK_CONTIGUOUS(grad_inputs);
+-
+-    CHECK_IS_FLOATING(grad);
+-    CHECK_IS_FLOATING(inputs);
+-    CHECK_IS_FLOATING(embeddings);
+-    CHECK_IS_INT(offsets);
+-    CHECK_IS_FLOATING(grad_embeddings);
+-    // CHECK_IS_FLOATING(dy_dx);
+-    // CHECK_IS_FLOATING(grad_inputs);
+-
+-    AT_DISPATCH_FLOATING_TYPES_AND_HALF(
+-    grad.scalar_type(), "grid_encode_backward", ([&] {
+-        grid_encode_backward_cuda<scalar_t>(grad.data_ptr<scalar_t>(), inputs.data_ptr<float>(), embeddings.data_ptr<scalar_t>(), offsets.data_ptr<int>(), grad_embeddings.data_ptr<scalar_t>(), B, D, C, L, S, H, dy_dx.has_value() ? dy_dx.value().data_ptr<scalar_t>() : nullptr, grad_inputs.has_value() ? grad_inputs.value().data_ptr<scalar_t>() : nullptr, gridtype, align_corners);
+-    }));
+-    
+-}
++#include <cuda.h>
++#include <cuda_fp16.h>
++#include <cuda_runtime.h>
++
++#include <ATen/cuda/CUDAContext.h>
++#include <torch/torch.h>
++
++#include <algorithm>
++#include <stdexcept>
++
++#include <stdint.h>
++#include <cstdio>
++
++
++#define CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x " must be a CUDA tensor")
++#define CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x " must be a contiguous tensor")
++#define CHECK_IS_INT(x) TORCH_CHECK(x.scalar_type() == at::ScalarType::Int, #x " must be an int tensor")
++#define CHECK_IS_FLOATING(x) TORCH_CHECK(x.scalar_type() == at::ScalarType::Float || x.scalar_type() == at::ScalarType::Half || x.scalar_type() == at::ScalarType::Double, #x " must be a floating tensor")
++
++
++// just for compatability of half precision in AT_DISPATCH_FLOATING_TYPES_AND_HALF...
++static inline  __device__ at::Half atomicAdd(at::Half *address, at::Half val) {
++  // requires CUDA >= 10 and ARCH >= 70
++  // this is very slow compared to float or __half2, and never used.
++  //return atomicAdd(reinterpret_cast<__half*>(address), val);
++}
++
++
++template <typename T>
++static inline __host__ __device__ T div_round_up(T val, T divisor) {
++    return (val + divisor - 1) / divisor;
++}
++
++
++template <uint32_t D>
++__device__ uint32_t fast_hash(const uint32_t pos_grid[D]) {
++    static_assert(D <= 7, "fast_hash can only hash up to 7 dimensions.");
++
++    // While 1 is technically not a good prime for hashing (or a prime at all), it helps memory coherence
++    // and is sufficient for our use case of obtaining a uniformly colliding index from high-dimensional
++    // coordinates.
++    constexpr uint32_t primes[7] = { 1, 2654435761, 805459861, 3674653429, 2097192037, 1434869437, 2165219737 };
++
++    uint32_t result = 0;
++    #pragma unroll
++    for (uint32_t i = 0; i < D; ++i) {
++        result ^= pos_grid[i] * primes[i];
++    }
++
++    return result;
++}
++
++
++template <uint32_t D, uint32_t C>
++__device__ uint32_t get_grid_index(const uint32_t gridtype, const bool align_corners, const uint32_t ch, const uint32_t hashmap_size, const uint32_t resolution, const uint32_t pos_grid[D]) {
++    uint32_t stride = 1;
++    uint32_t index = 0;
++
++    #pragma unroll
++    for (uint32_t d = 0; d < D && stride <= hashmap_size; d++) {
++        index += pos_grid[d] * stride;
++        stride *= align_corners ? resolution: (resolution + 1);
++    }
++
++    // NOTE: for NeRF, the hash is in fact not necessary. Check https://github.com/NVlabs/instant-ngp/issues/97.
++    // gridtype: 0 == hash, 1 == tiled
++    if (gridtype == 0 && stride > hashmap_size) {
++        index = fast_hash<D>(pos_grid);
++    }
++
++    return (index % hashmap_size) * C + ch;
++}
++
++
++template <typename scalar_t, uint32_t D, uint32_t C>
++__global__ void kernel_grid(
++    const float * __restrict__ inputs, 
++    const scalar_t * __restrict__ grid, 
++    const int * __restrict__ offsets, 
++    const int * __restrict__ resolutions,
++    scalar_t * __restrict__ outputs, 
++    const uint32_t B, const uint32_t L, const float S, const uint32_t H,
++    scalar_t * __restrict__ dy_dx,
++    const uint32_t gridtype,
++    const bool align_corners
++) {
++    const uint32_t b = blockIdx.x * blockDim.x + threadIdx.x;
++    
++    if (b >= B) return;
++
++    const uint32_t level = blockIdx.y;
++    
++    // locate
++    grid += (uint32_t)offsets[level] * C;
++    inputs += b * D;
++    outputs += level * B * C + b * C;
++
++    // check input range (should be in [0, 1])
++    bool flag_oob = false;
++    #pragma unroll
++    for (uint32_t d = 0; d < D; d++) {
++        if (inputs[d] < 0 || inputs[d] > 1) {
++            flag_oob = true;
++        }
++    }
++    // if input out of bound, just set output to 0
++    if (flag_oob) {
++        #pragma unroll
++        for (uint32_t ch = 0; ch < C; ch++) {
++            outputs[ch] = 0; 
++        }
++        if (dy_dx) {
++            dy_dx += b * D * L * C + level * D * C; // B L D C
++            #pragma unroll
++            for (uint32_t d = 0; d < D; d++) {
++                #pragma unroll
++                for (uint32_t ch = 0; ch < C; ch++) {
++                    dy_dx[d * C + ch] = 0; 
++                }       
++            }
++        }
++        return;
++    }
++
++    const uint32_t hashmap_size = offsets[level + 1] - offsets[level];
++
++    float scale;
++    uint32_t resolution;
++    if (resolutions) {
++        resolution = (uint32_t)resolutions[level];
++        scale = (float)(resolution - 1);
++    } else {
++        scale = exp2f(level * S) * H - 1.0f;
++        resolution = (uint32_t)ceil(scale) + 1;
++    }
++    
++    // calculate coordinate
++    float pos[D];
++    uint32_t pos_grid[D];
++
++    #pragma unroll
++    for (uint32_t d = 0; d < D; d++) {
++        pos[d] = inputs[d] * scale + (align_corners ? 0.0f : 0.5f);
++        pos_grid[d] = floorf(pos[d]);
++        pos[d] -= (float)pos_grid[d];
++    }
++
++    //printf("[b=%d, l=%d] pos=(%f, %f)+(%d, %d)\n", b, level, pos[0], pos[1], pos_grid[0], pos_grid[1]);
++
++    // interpolate
++    scalar_t results[C] = {0}; // temp results in register
++
++    #pragma unroll
++    for (uint32_t idx = 0; idx < (1 << D); idx++) {
++        float w = 1;
++        uint32_t pos_grid_local[D];
++
++        #pragma unroll
++        for (uint32_t d = 0; d < D; d++) {
++            if ((idx & (1 << d)) == 0) {
++                w *= 1 - pos[d];
++                pos_grid_local[d] = pos_grid[d];
++            } else {
++                w *= pos[d];
++                pos_grid_local[d] = pos_grid[d] + 1;
++            }
++        }
++
++        uint32_t index = get_grid_index<D, C>(gridtype, align_corners, 0, hashmap_size, resolution, pos_grid_local);
++
++        // writing to register (fast)
++        #pragma unroll
++        for (uint32_t ch = 0; ch < C; ch++) {
++            results[ch] += w * grid[index + ch];
++        }
++
++        //printf("[b=%d, l=%d] int %d, idx %d, w %f, val %f\n", b, level, idx, index, w, grid[index]);
++    }    
++
++    // writing to global memory (slow)
++    #pragma unroll
++    for (uint32_t ch = 0; ch < C; ch++) {
++        outputs[ch] = results[ch]; 
++    }
++
++    // prepare dy_dx
++    // differentiable (soft) indexing: https://discuss.pytorch.org/t/differentiable-indexing/17647/9
++    if (dy_dx) {
++
++        dy_dx += b * D * L * C + level * D * C; // B L D C
++
++        #pragma unroll
++        for (uint32_t gd = 0; gd < D; gd++) {
++
++            scalar_t results_grad[C] = {0};
++
++            #pragma unroll
++            for (uint32_t idx = 0; idx < (1 << (D - 1)); idx++) {
++                float w = scale;
++                uint32_t pos_grid_local[D];
++
++                #pragma unroll
++                for (uint32_t nd = 0; nd < D - 1; nd++) {
++                    const uint32_t d = (nd >= gd) ? (nd + 1) : nd;
++
++                    if ((idx & (1 << nd)) == 0) {
++                        w *= 1 - pos[d];
++                        pos_grid_local[d] = pos_grid[d];
++                    } else {
++                        w *= pos[d];
++                        pos_grid_local[d] = pos_grid[d] + 1;
++                    }
++                }
++
++                pos_grid_local[gd] = pos_grid[gd];
++                uint32_t index_left = get_grid_index<D, C>(gridtype, align_corners, 0, hashmap_size, resolution, pos_grid_local);
++                pos_grid_local[gd] = pos_grid[gd] + 1;
++                uint32_t index_right = get_grid_index<D, C>(gridtype, align_corners, 0, hashmap_size, resolution, pos_grid_local);
++
++                #pragma unroll
++                for (uint32_t ch = 0; ch < C; ch++) {
++                    results_grad[ch] += w * (grid[index_right + ch] - grid[index_left + ch]);
++                }
++            }
++
++            #pragma unroll
++            for (uint32_t ch = 0; ch < C; ch++) {
++                dy_dx[gd * C + ch] = results_grad[ch];
++            }
++        }
++    }
++}
++
++
++template <typename scalar_t, uint32_t D, uint32_t C, uint32_t N_C>
++__global__ void kernel_grid_backward(
++    const scalar_t * __restrict__ grad,
++    const float * __restrict__ inputs, 
++    const scalar_t * __restrict__ grid, 
++    const int * __restrict__ offsets, 
++    const int * __restrict__ resolutions,
++    scalar_t * __restrict__ grad_grid, 
++    const uint32_t B, const uint32_t L, const float S, const uint32_t H,
++    const uint32_t gridtype,
++    const bool align_corners
++) {
++    const uint32_t b = (blockIdx.x * blockDim.x + threadIdx.x) * N_C / C;
++    if (b >= B) return;
++
++    const uint32_t level = blockIdx.y;
++    const uint32_t ch = (blockIdx.x * blockDim.x + threadIdx.x) * N_C - b * C;
++
++    // locate
++    grad_grid += offsets[level] * C;
++    inputs += b * D;
++    grad += level * B * C + b * C + ch; // L, B, C
++
++    const uint32_t hashmap_size = offsets[level + 1] - offsets[level];
++
++    float scale;
++    uint32_t resolution;
++    if (resolutions) {
++        resolution = (uint32_t)resolutions[level];
++        scale = (float)(resolution - 1);
++    } else {
++        scale = exp2f(level * S) * H - 1.0f;
++        resolution = (uint32_t)ceil(scale) + 1;
++    }
++
++    // check input range (should be in [0, 1])
++    #pragma unroll
++    for (uint32_t d = 0; d < D; d++) {
++        if (inputs[d] < 0 || inputs[d] > 1) {
++            return; // grad is init as 0, so we simply return.
++        }
++    }
++
++    // calculate coordinate
++    float pos[D];
++    uint32_t pos_grid[D];
++
++    #pragma unroll
++    for (uint32_t d = 0; d < D; d++) {
++        pos[d] = inputs[d] * scale + (align_corners ? 0.0f : 0.5f);
++        pos_grid[d] = floorf(pos[d]);
++        pos[d] -= (float)pos_grid[d];
++    }
++
++    scalar_t grad_cur[N_C] = {0}; // fetch to register
++    #pragma unroll
++    for (uint32_t c = 0; c < N_C; c++) {
++        grad_cur[c] = grad[c];
++    }
++
++    // interpolate
++    #pragma unroll
++    for (uint32_t idx = 0; idx < (1 << D); idx++) {
++        float w = 1;
++        uint32_t pos_grid_local[D];
++
++        #pragma unroll
++        for (uint32_t d = 0; d < D; d++) {
++            if ((idx & (1 << d)) == 0) {
++                w *= 1 - pos[d];
++                pos_grid_local[d] = pos_grid[d];
++            } else {
++                w *= pos[d];
++                pos_grid_local[d] = pos_grid[d] + 1;
++            }
++        }
++
++        uint32_t index = get_grid_index<D, C>(gridtype, align_corners, ch, hashmap_size, resolution, pos_grid_local);
++
++        // atomicAdd for __half is slow (especially for large values), so we use __half2 if N_C % 2 == 0
++        // TODO: use float which is better than __half, if N_C % 2 != 0
++        if (std::is_same<scalar_t, at::Half>::value && N_C % 2 == 0) {
++            #pragma unroll
++            for (uint32_t c = 0; c < N_C; c += 2) {
++                // process two __half at once (by interpreting as a __half2)
++                __half2 v = {(__half)(w * grad_cur[c]), (__half)(w * grad_cur[c + 1])};
++                atomicAdd((__half2*)&grad_grid[index + c], v);
++            }
++        // float, or __half when N_C % 2 != 0 (which means C == 1)
++        } else {
++            #pragma unroll
++            for (uint32_t c = 0; c < N_C; c++) {
++                atomicAdd(&grad_grid[index + c], w * grad_cur[c]);
++            }
++        }
++    }    
++}
++
++
++template <typename scalar_t, uint32_t D, uint32_t C>
++__global__ void kernel_input_backward(
++    const scalar_t * __restrict__ grad,
++    const scalar_t * __restrict__ dy_dx,  
++    scalar_t * __restrict__ grad_inputs, 
++    uint32_t B, uint32_t L
++) {
++    const uint32_t t = threadIdx.x + blockIdx.x * blockDim.x;
++    if (t >= B * D) return;
++
++    const uint32_t b = t / D;
++    const uint32_t d = t - b * D;
++
++    dy_dx += b * L * D * C;
++
++    scalar_t result = 0;
++    
++    # pragma unroll
++    for (int l = 0; l < L; l++) {
++        # pragma unroll
++        for (int ch = 0; ch < C; ch++) {
++            result += grad[l * B * C + b * C + ch] * dy_dx[l * D * C + d * C + ch];
++        }
++    }
++
++    grad_inputs[t] = result;
++}
++
++
++template <typename scalar_t, uint32_t D>
++void kernel_grid_wrapper(const float *inputs, const scalar_t *embeddings, const int *offsets, const int *resolutions, scalar_t *outputs, const uint32_t B, const uint32_t C, const uint32_t L, const float S, const uint32_t H, scalar_t *dy_dx, const uint32_t gridtype, const bool align_corners) {
++    static constexpr uint32_t N_THREAD = 512;
++    const dim3 blocks_hashgrid = { div_round_up(B, N_THREAD), L, 1 };
++    switch (C) {
++        case 1: kernel_grid<scalar_t, D, 1><<<blocks_hashgrid, N_THREAD>>>(inputs, embeddings, offsets, resolutions, outputs, B, L, S, H, dy_dx, gridtype, align_corners); break;
++        case 2: kernel_grid<scalar_t, D, 2><<<blocks_hashgrid, N_THREAD>>>(inputs, embeddings, offsets, resolutions, outputs, B, L, S, H, dy_dx, gridtype, align_corners); break;
++        case 4: kernel_grid<scalar_t, D, 4><<<blocks_hashgrid, N_THREAD>>>(inputs, embeddings, offsets, resolutions, outputs, B, L, S, H, dy_dx, gridtype, align_corners); break;
++        case 8: kernel_grid<scalar_t, D, 8><<<blocks_hashgrid, N_THREAD>>>(inputs, embeddings, offsets, resolutions, outputs, B, L, S, H, dy_dx, gridtype, align_corners); break;
++        default: throw std::runtime_error{"GridEncoding: C must be 1, 2, 4, or 8."};
++    }
++}
++
++// inputs: [B, D], float, in [0, 1]
++// embeddings: [sO, C], float
++// offsets: [L + 1], uint32_t
++// outputs: [L, B, C], float (L first, so only one level of hashmap needs to fit into cache at a time.)
++// H: base resolution
++// dy_dx: [B, L * D * C]
++template <typename scalar_t>
++void grid_encode_forward_cuda(const float *inputs, const scalar_t *embeddings, const int *offsets, const int *resolutions, scalar_t *outputs, const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L, const float S, const uint32_t H, scalar_t *dy_dx, const uint32_t gridtype, const bool align_corners) {
++    switch (D) {
++        case 1: kernel_grid_wrapper<scalar_t, 1>(inputs, embeddings, offsets, resolutions, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
++        case 2: kernel_grid_wrapper<scalar_t, 2>(inputs, embeddings, offsets, resolutions, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
++        case 3: kernel_grid_wrapper<scalar_t, 3>(inputs, embeddings, offsets, resolutions, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
++        case 4: kernel_grid_wrapper<scalar_t, 4>(inputs, embeddings, offsets, resolutions, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
++        case 5: kernel_grid_wrapper<scalar_t, 5>(inputs, embeddings, offsets, resolutions, outputs, B, C, L, S, H, dy_dx, gridtype, align_corners); break;
++        default: throw std::runtime_error{"GridEncoding: D must be 1, 2, 3, 4, or 5."};
++    }
++    
++}
++
++template <typename scalar_t, uint32_t D>
++void kernel_grid_backward_wrapper(const scalar_t *grad, const float *inputs, const scalar_t *embeddings, const int *offsets, const int *resolutions, scalar_t *grad_embeddings, const uint32_t B, const uint32_t C, const uint32_t L, const float S, const uint32_t H, scalar_t *dy_dx, scalar_t *grad_inputs, const uint32_t gridtype, const bool align_corners) {
++    static constexpr uint32_t N_THREAD = 256;
++    const uint32_t N_C = std::min(2u, C); // n_features_per_thread
++    const dim3 blocks_hashgrid = { div_round_up(B * C / N_C, N_THREAD), L, 1 };
++    switch (C) {
++        case 1: 
++            kernel_grid_backward<scalar_t, D, 1, 1><<<blocks_hashgrid, N_THREAD>>>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, L, S, H, gridtype, align_corners); 
++            if (dy_dx) kernel_input_backward<scalar_t, D, 1><<<div_round_up(B * D, N_THREAD), N_THREAD>>>(grad, dy_dx, grad_inputs, B, L);
++            break;
++        case 2: 
++            kernel_grid_backward<scalar_t, D, 2, 2><<<blocks_hashgrid, N_THREAD>>>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, L, S, H, gridtype, align_corners);
++            if (dy_dx) kernel_input_backward<scalar_t, D, 2><<<div_round_up(B * D, N_THREAD), N_THREAD>>>(grad, dy_dx, grad_inputs, B, L);
++            break;
++        case 4: 
++            kernel_grid_backward<scalar_t, D, 4, 2><<<blocks_hashgrid, N_THREAD>>>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, L, S, H, gridtype, align_corners);
++            if (dy_dx) kernel_input_backward<scalar_t, D, 4><<<div_round_up(B * D, N_THREAD), N_THREAD>>>(grad, dy_dx, grad_inputs, B, L);
++            break;
++        case 8: 
++            kernel_grid_backward<scalar_t, D, 8, 2><<<blocks_hashgrid, N_THREAD>>>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, L, S, H, gridtype, align_corners);
++            if (dy_dx) kernel_input_backward<scalar_t, D, 8><<<div_round_up(B * D, N_THREAD), N_THREAD>>>(grad, dy_dx, grad_inputs, B, L);
++            break;
++        default: throw std::runtime_error{"GridEncoding: C must be 1, 2, 4, or 8."};
++    }
++}
++
++
++// grad: [L, B, C], float
++// inputs: [B, D], float, in [0, 1]
++// embeddings: [sO, C], float
++// offsets: [L + 1], uint32_t
++// grad_embeddings: [sO, C]
++// H: base resolution
++template <typename scalar_t>
++void grid_encode_backward_cuda(const scalar_t *grad, const float *inputs, const scalar_t *embeddings, const int *offsets, const int *resolutions, scalar_t *grad_embeddings, const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L, const float S, const uint32_t H, scalar_t *dy_dx, scalar_t *grad_inputs, const uint32_t gridtype, const bool align_corners) {
++    switch (D) {
++        case 1: kernel_grid_backward_wrapper<scalar_t, 1>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
++        case 2: kernel_grid_backward_wrapper<scalar_t, 2>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
++        case 3: kernel_grid_backward_wrapper<scalar_t, 3>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
++        case 4: kernel_grid_backward_wrapper<scalar_t, 4>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
++        case 5: kernel_grid_backward_wrapper<scalar_t, 5>(grad, inputs, embeddings, offsets, resolutions, grad_embeddings, B, C, L, S, H, dy_dx, grad_inputs, gridtype, align_corners); break;
++        default: throw std::runtime_error{"GridEncoding: D must be 1, 2, 3, 4, or 5."};
++    }
++}
++
++
++
++void grid_encode_forward(const at::Tensor inputs, const at::Tensor embeddings, const at::Tensor offsets, at::Tensor outputs,
++                         const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L,
++                         const float S, const uint32_t H, at::optional<at::Tensor> dy_dx,
++                         const uint32_t gridtype, const bool align_corners,
++                         const at::Tensor resolutions) {
++    CHECK_CUDA(inputs);
++    CHECK_CUDA(embeddings);
++    CHECK_CUDA(offsets);
++    CHECK_CUDA(outputs);
++    if (resolutions.numel() > 0) CHECK_CUDA(resolutions);
++    // CHECK_CUDA(dy_dx);
++    
++    CHECK_CONTIGUOUS(inputs);
++    CHECK_CONTIGUOUS(embeddings);
++    CHECK_CONTIGUOUS(offsets);
++    CHECK_CONTIGUOUS(outputs);
++    if (resolutions.numel() > 0) CHECK_CONTIGUOUS(resolutions);
++    // CHECK_CONTIGUOUS(dy_dx);
++
++    CHECK_IS_FLOATING(inputs);
++    CHECK_IS_FLOATING(embeddings);
++    CHECK_IS_INT(offsets);
++    CHECK_IS_FLOATING(outputs);
++    if (resolutions.numel() > 0) CHECK_IS_INT(resolutions);
++    // CHECK_IS_FLOATING(dy_dx);
++
++    AT_DISPATCH_FLOATING_TYPES_AND_HALF(
++    embeddings.scalar_type(), "grid_encode_forward", ([&] {
++        grid_encode_forward_cuda<scalar_t>(
++            inputs.data_ptr<float>(),
++            embeddings.data_ptr<scalar_t>(),
++            offsets.data_ptr<int>(),
++            resolutions.numel() > 0 ? resolutions.data_ptr<int>() : nullptr,
++            outputs.data_ptr<scalar_t>(),
++            B, D, C, L, S, H,
++            dy_dx.has_value() ? dy_dx.value().data_ptr<scalar_t>() : nullptr,
++            gridtype, align_corners);
++    }));
++}
++
++void grid_encode_backward(const at::Tensor grad, const at::Tensor inputs, const at::Tensor embeddings, const at::Tensor offsets,
++                          at::Tensor grad_embeddings,
++                          const uint32_t B, const uint32_t D, const uint32_t C, const uint32_t L,
++                          const float S, const uint32_t H,
++                          const at::optional<at::Tensor> dy_dx, at::optional<at::Tensor> grad_inputs,
++                          const uint32_t gridtype, const bool align_corners,
++                          const at::Tensor resolutions) {
++    CHECK_CUDA(grad);
++    CHECK_CUDA(inputs);
++    CHECK_CUDA(embeddings);
++    CHECK_CUDA(offsets);
++    CHECK_CUDA(grad_embeddings);
++    if (resolutions.numel() > 0) CHECK_CUDA(resolutions);
++    // CHECK_CUDA(dy_dx);
++    // CHECK_CUDA(grad_inputs);
++    
++    CHECK_CONTIGUOUS(grad);
++    CHECK_CONTIGUOUS(inputs);
++    CHECK_CONTIGUOUS(embeddings);
++    CHECK_CONTIGUOUS(offsets);
++    CHECK_CONTIGUOUS(grad_embeddings);
++    if (resolutions.numel() > 0) CHECK_CONTIGUOUS(resolutions);
++    // CHECK_CONTIGUOUS(dy_dx);
++    // CHECK_CONTIGUOUS(grad_inputs);
++
++    CHECK_IS_FLOATING(grad);
++    CHECK_IS_FLOATING(inputs);
++    CHECK_IS_FLOATING(embeddings);
++    CHECK_IS_INT(offsets);
++    CHECK_IS_FLOATING(grad_embeddings);
++    if (resolutions.numel() > 0) CHECK_IS_INT(resolutions);
++    // CHECK_IS_FLOATING(dy_dx);
++    // CHECK_IS_FLOATING(grad_inputs);
++
++    AT_DISPATCH_FLOATING_TYPES_AND_HALF(
++    grad.scalar_type(), "grid_encode_backward", ([&] {
++        grid_encode_backward_cuda<scalar_t>(
++            grad.data_ptr<scalar_t>(),
++            inputs.data_ptr<float>(),
++            embeddings.data_ptr<scalar_t>(),
++            offsets.data_ptr<int>(),
++            resolutions.numel() > 0 ? resolutions.data_ptr<int>() : nullptr,
++            grad_embeddings.data_ptr<scalar_t>(),
++            B, D, C, L, S, H,
++            dy_dx.has_value() ? dy_dx.value().data_ptr<scalar_t>() : nullptr,
++            grad_inputs.has_value() ? grad_inputs.value().data_ptr<scalar_t>() : nullptr,
++            gridtype, align_corners);
++    }));
++    
++}
