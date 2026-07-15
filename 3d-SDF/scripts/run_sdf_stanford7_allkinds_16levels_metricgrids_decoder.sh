@@ -1,21 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Re-run the Stanford7 "allkinds" rim_full sweep (log2 hashmap sizes 14/14.5/15,
-# all 7 scenes) with:
-#   - NUM_LEVELS=16 (was 15)
-#   - RIMSDFNGP's decoder now includes the MertricEmbedding 3-branch positional
-#     pre-transform ported from img_sdf/ngp.py's NGP class (the original
-#     MetricGrids decoder), instead of feeding raw coordinates straight into
-#     the encoder. This applies unconditionally to every RIMSDFNGP run now,
-#     so there's no flag to toggle it back off.
-#
-# All 4 scene-split part scripts write into the SAME output root (matching how
-# the earlier "_metricfix_seq" results were actually produced -- see
-# outputs/sdf_stanford7_allkinds_part1_metricfix_seq/logs/log2_*/*.txt, which
-# show all 7 scenes sharing that one OUT_ROOT despite the "part1" name), one
-# part at a time (no backgrounding, no multi-GPU split) so only one experiment
-# is training at any given moment.
+# Sequential runner for the 16-level Stanford7 variant. All four scene splits
+# share one output root and run one at a time on the selected GPU.
 #
 # Usage:
 #   bash scripts/run_sdf_stanford7_allkinds_16levels_metricgrids_decoder.sh

@@ -5,13 +5,14 @@ set -euo pipefail
 # Run precompute_rim_block_info.sh first, or set INFO_PT to an existing file.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 INPUT_ARG="${1:-./tokyo.jpg}"
 if [[ "${INPUT_ARG}" = /* ]]; then
   INPUT_IMAGE="${INPUT_ARG}"
 else
   INPUT_IMAGE="$(pwd)/${INPUT_ARG}"
 fi
-cd "${SCRIPT_DIR}"
+cd "${REPO_DIR}"
 
 CONDA_ENV="${CONDA_ENV:-py310}"
 CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-1}"
@@ -30,8 +31,8 @@ BASE_RESOLUTION="${BASE_RESOLUTION:-64}"
 LOG_HASH_SIZE="${LOG_HASH_SIZE:-19}"
 BLOCK_SIZE="${BLOCK_SIZE:-400}"
 
-GATE_MODE="${GATE_MODE:-trainable_sigmoid}"       # trainable_sigmoid or fixed_binary
-FALLBACK_MODE="${FALLBACK_MODE:-global_shared}"       # blockwise or global_shared
+GATE_MODE="${GATE_MODE:-fixed_binary}"             # fixed_binary matches the paper
+FALLBACK_MODE="${FALLBACK_MODE:-blockwise}"           # blockwise or global_shared
 GATE_TEMPERATURE="${GATE_TEMPERATURE:-1.0}"
 GATE_INIT_LOGIT="${GATE_INIT_LOGIT:-2.5}"          # 2.0 initializes off/on near sigmoid(-/+2)=0.119/0.881; set none to preserve raw gates
 GATE_REG_WEIGHT="${GATE_REG_WEIGHT:-0.0}"

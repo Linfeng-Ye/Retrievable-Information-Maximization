@@ -2,9 +2,8 @@
 Compare a ground-truth mesh against a trained SDF's marching-cubes
 reconstruction, rendered from angles you choose.
 
-Requires trimesh + matplotlib, which live in the `INR` conda env, not the
-system python:
-    /home/l44ye/.conda/envs/INR/bin/python visualize_sdf.py ...
+Requires trimesh and matplotlib:
+    python visualize_sdf.py ...
 
 Typical workflow
 -----------------

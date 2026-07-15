@@ -676,8 +676,19 @@ def train(
     rim_gate_regularization_weight: float,
     rim_fixed_gate_threshold: float,
     rim_fallback_mode: str,
+    seed: int = 0,
 ):  
-    device = torch.device(device_str if torch.cuda.is_available() or "cuda" in device_str else "cpu")
+    np.random.seed(int(seed))
+    torch.manual_seed(int(seed))
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(int(seed))
+
+    requested_device = torch.device(device_str)
+    if requested_device.type == "cuda" and not torch.cuda.is_available():
+        print("[warn] CUDA is unavailable; falling back to CPU.", flush=True)
+        device = torch.device("cpu")
+    else:
+        device = requested_device
     print(f"Using device: {device}")
 
     # ---- Load & resize image as uint8 ----
@@ -994,7 +1005,7 @@ def parse_args():
     p.add_argument("--rim_init_scheduler", type=str, default="geometric", choices=["geometric", "linear"])
     p.add_argument("--rim_gate_solver", type=str, default="exact_fractional", choices=["exact_fractional", "prefix_fallback"])
     p.add_argument("--rim_save_init_state", action="store_true")
-    p.add_argument("--rim_gate_mode", type=str, default="trainable_sigmoid", choices=["trainable_sigmoid", "fixed_binary"])
+    p.add_argument("--rim_gate_mode", type=str, default="fixed_binary", choices=["trainable_sigmoid", "fixed_binary"])
     p.add_argument("--rim_gate_temperature", type=float, default=1.0)
     p.add_argument(
         "--rim_gate_init_logit",
@@ -1005,6 +1016,7 @@ def parse_args():
     p.add_argument("--rim_gate_regularization_weight", type=float, default=0.0)
     p.add_argument("--rim_fixed_gate_threshold", type=float, default=0.5)
     p.add_argument("--rim_fallback_mode", type=str, default="blockwise", choices=["blockwise", "global_shared"])
+    p.add_argument("--seed", type=int, default=0)
     
     p.add_argument("--device", type=str, default="cuda", help='Device string, e.g., "cuda" or "cpu".')
     p.add_argument("--out_prefix", type=str, default="fit", help="Prefix for outputs.")
@@ -1113,6 +1125,7 @@ def main():
         rim_gate_regularization_weight=float(args.rim_gate_regularization_weight),
         rim_fixed_gate_threshold=float(args.rim_fixed_gate_threshold),
         rim_fallback_mode=str(args.rim_fallback_mode),
+        seed=int(args.seed),
     )
     os.makedirs(args.reconst_dir, exist_ok=True)
     reconst_path = os.path.join(args.reconst_dir, args.reconst_name)

@@ -21,8 +21,8 @@
 #                     resolution-selection DP on its own). Runs a single DP pass
 #                     (RIM_ITERS forced to 1) since fixed gates make the alternating
 #                     gate/resolution loop a no-op.
-#   rim_gate       -> geometric resolutions, trainable RIM gates (isolates gating on its own)
-#   rim_full       -> RIM resolution schedule + trainable RIM gates ("our method")
+#   rim_gate       -> geometric resolutions + selected fixed RIM gates
+#   rim_full       -> RIM resolution schedule + selected fixed RIM gates ("our method")
 # Example: KINDS="baseline rim_resolution rim_gate rim_full"
 # If KINDS is unset, falls back to the legacy MODE-driven behavior (MODE=baseline|rim|both,
 # ENCODER/RIM_GATE_MODE picked for the single "rim" kind) for backward compatibility with
@@ -54,7 +54,7 @@ case "${MODE}" in
 esac
 
 if [[ -z "${PYTHON:-}" ]]; then
-  for cand in /home/l44ye/.conda/envs/INR/bin/python3 /home/l44ye/.conda/envs/py310/bin/python3 python python3; do
+  for cand in python python3; do
     if command -v "${cand}" >/dev/null 2>&1 || [[ -x "${cand}" ]]; then
       PYTHON="${cand}"
       break
@@ -100,13 +100,13 @@ run_named_kind_log2() {
     rim_gate)
       run_script="scripts/run_sdf_rim.sh"
       kind_encoder="rim_gate"
-      kind_gate_mode="trainable"
+      kind_gate_mode="fixed"
       kind_rim_iters=""
       ;;
     rim_full)
       run_script="scripts/run_sdf_rim.sh"
       kind_encoder="rim_full"
-      kind_gate_mode="trainable"
+      kind_gate_mode="fixed"
       kind_rim_iters=""
       ;;
     rim)

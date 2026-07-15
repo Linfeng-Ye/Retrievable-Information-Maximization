@@ -6,13 +6,14 @@ set -euo pipefail
 #   LEVELS=64 NUM_CANDIDATES=128 WIDTH=8000 HEIGHT=8000 ./precompute_rim_block_info.sh ./pluto.jpg
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 INPUT_ARG="${1:-./tokyo.jpg}"
 if [[ "${INPUT_ARG}" = /* ]]; then
   INPUT_IMAGE="${INPUT_ARG}"
 else
   INPUT_IMAGE="$(pwd)/${INPUT_ARG}"
 fi
-cd "${SCRIPT_DIR}"
+cd "${REPO_DIR}"
 
 CONDA_ENV="${CONDA_ENV:-py310}"
 CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-7}"

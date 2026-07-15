@@ -4,10 +4,10 @@ set -euo pipefail
 # Full Stanford SDF experiment batch for MetricGrids.
 #
 # Launch from anywhere:
-#   CUDA_VISIBLE_DEVICES=0 bash /home/l44ye/MetricGrids/downloadSDF.sh
+#   CUDA_VISIBLE_DEVICES=0 bash downloadSDF.sh
 #
 # Quick smoke run:
-#   DEBUG=1 CUDA_VISIBLE_DEVICES=0 bash /home/l44ye/MetricGrids/downloadSDF.sh
+#   DEBUG=1 CUDA_VISIBLE_DEVICES=0 bash downloadSDF.sh
 #
 # Defaults run the same ~900K-effective RIM-resolution setup for all 7 scenes:
 #   MODE=rim
@@ -48,7 +48,7 @@ LOG_ROOT="${LOG_ROOT:-${OUT_ROOT}/logs}"
 SCENES=(Armadillo Bunny Dragon Buddha Lucy XYZDragon Statuette)
 
 if [[ -z "${PYTHON:-}" ]]; then
-  for cand in python /home/l44ye/.conda/envs/INR/bin/python3 /home/l44ye/.conda/envs/py310/bin/python3 python3; do
+  for cand in python python3; do
     if command -v "${cand}" >/dev/null 2>&1 || [[ -x "${cand}" ]]; then
       PYTHON="${cand}"
       break

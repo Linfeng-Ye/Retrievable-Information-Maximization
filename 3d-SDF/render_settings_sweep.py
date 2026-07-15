@@ -12,7 +12,7 @@ nothing lands in vis_out/hq (owned by vis_hq.sh).
 several invocations (e.g. one per GPU) can each render a disjoint slice in
 parallel.
 
-    /home/l44ye/.conda/envs/INR/bin/python render_settings_sweep.py \\
+    python render_settings_sweep.py \\
         --root outputs_pre --root outputs_secondbest \\
         --view 15,60 --view 10,225 \\
         --out-dir vis_out/hq_sweep \\

@@ -18,7 +18,7 @@ export KINDS="${KINDS:-rim_full}"
 export LOG2_HASHMAP_SIZES="${LOG2_HASHMAP_SIZES:-14 14.5 15}"
 export BATCH_SIZE="${BATCH_SIZE:-1048576}"
 export RIM_ITERS="${RIM_ITERS:-20}"
-export RIM_GATE_MODE="${RIM_GATE_MODE:-trainable}"
+export RIM_GATE_MODE="${RIM_GATE_MODE:-fixed}"
 export RIM_FALLBACK_MODE="${RIM_FALLBACK_MODE:-blockwise}"
 
 source scripts/run_sdf_stanford7_log2_sweep_common.sh

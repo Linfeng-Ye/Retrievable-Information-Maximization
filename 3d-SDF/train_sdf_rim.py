@@ -128,7 +128,7 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--rim_gate_sparsity_weight", type=float, default=0.0)
     p.add_argument("--rim_fallback_mode", default="blockwise", choices=["blockwise", "global_shared"])
     p.add_argument("--rim_train_resolution", action="store_true", help="Reserved; selected resolutions are fixed in this implementation.")
-    p.set_defaults(rim_gate_trainable=True)
+    p.set_defaults(rim_gate_trainable=False)
     p.add_argument("--rim_gate_trainable", dest="rim_gate_trainable", action="store_true")
     p.add_argument("--rim_gate_fixed", dest="rim_gate_trainable", action="store_false")
     return p

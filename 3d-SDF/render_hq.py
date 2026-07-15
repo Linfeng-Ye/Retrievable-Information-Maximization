@@ -5,9 +5,8 @@ decimation. For a side-by-side comparison figure, use visualize_sdf.py
 instead; this is for pulling the sharpest possible single shot of a chosen
 viewpoint, e.g. for a paper figure.
 
-Requires trimesh + matplotlib, which live in the `INR` conda env, not the
-system python:
-    /home/l44ye/.conda/envs/INR/bin/python render_hq.py ...
+Requires trimesh and matplotlib:
+    python render_hq.py ...
 
 Typical use, after picking angles with `visualize_sdf.py explore`:
     python render_hq.py --scene Bunny --view 15,60 --view 10,225 \\

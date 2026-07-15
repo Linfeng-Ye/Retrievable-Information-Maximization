@@ -18,7 +18,7 @@ Environment overrides:
   MODE=baseline|rim|both        Default: rim
   ENCODER=rim_full|rim_resolution|rim_gate|fixed_hashgrid
                                 Default for RIM mode: rim_full
-  RIM_GATE_MODE=trainable|fixed Default: trainable
+  RIM_GATE_MODE=fixed|trainable Default: fixed
   PREPARE=auto|1|0             Default: auto
   PREP_SKIP_EVAL=1|0           Default: 1
   PYTHON=/path/to/python       Default: auto-detected
@@ -55,7 +55,7 @@ case "${MODE}" in
 esac
 
 if [[ -z "${PYTHON:-}" ]]; then
-  for cand in python /home/l44ye/.conda/envs/INR/bin/python3 /home/l44ye/.conda/envs/py310/bin/python3 python3; do
+  for cand in python python3; do
     if command -v "${cand}" >/dev/null 2>&1 || [[ -x "${cand}" ]]; then
       PYTHON="${cand}"
       break
@@ -107,7 +107,7 @@ if [[ "${MODE}" == "baseline" || "${MODE}" == "both" ]]; then
 fi
 
 if [[ "${MODE}" == "rim" || "${MODE}" == "both" ]]; then
-  echo "[SDF] Running RIM SDF with trainable sigmoid gates"
+  echo "[SDF] Running RIM SDF with the fixed gates used in the paper"
   PYTHON="${PYTHON}" bash scripts/run_sdf_rim.sh "${MESH}" "${ALIAS}"
 fi
 

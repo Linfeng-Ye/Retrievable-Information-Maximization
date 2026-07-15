@@ -4,15 +4,15 @@ set -euo pipefail
 # Kodak B-RIM grid:
 #   images: Kodak/*.png
 #   GPUs: all 8 by default (0 1 2 3 4 5 6 7)
-#   K: 1 2
+#   pixel shuffle K: 1 (disabled, as in the paper)
 #   block size: 16 32 64 128
 #   log_hash_size: 10..16
 #
 # Usage:
-#   ./run_rim_kodak_grid.sh              # precompute, fit, summarize
-#   ./run_rim_kodak_grid.sh precompute
-#   ./run_rim_kodak_grid.sh fit
-#   ./run_rim_kodak_grid.sh summarize
+#   bash scripts/run_rim_kodak_grid.sh              # precompute, fit, summarize
+#   bash scripts/run_rim_kodak_grid.sh precompute
+#   bash scripts/run_rim_kodak_grid.sh fit
+#   bash scripts/run_rim_kodak_grid.sh summarize
 #
 # Per-GPU scripts:
 #   ./run_rim_kodak_gpu0.sh              # worker shard 0/8 on GPU 0
@@ -25,22 +25,19 @@ set -euo pipefail
 #   KODAK_IMAGES="Kodak/1.png Kodak/2.png" ./run_rim_kodak_grid.sh fit
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "${SCRIPT_DIR}"
-
-if ! command -v conda >/dev/null 2>&1 && [[ -x /home/miniconda3/bin/conda ]]; then
-  export PATH="/home/miniconda3/bin:${PATH}"
-fi
+REPO_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+cd "${REPO_DIR}"
 
 STAGE="${1:-all}"
 
 CONDA_ENV="${CONDA_ENV:-py310}"
 RUN_PREFIX="${RUN_PREFIX:-rim_kodak}"
-KODAK_DIR="${KODAK_DIR:-${SCRIPT_DIR}/Kodak}"
+KODAK_DIR="${KODAK_DIR:-${REPO_DIR}/data/Kodak}"
 LOG_DIR="${LOG_DIR:-logs/${RUN_PREFIX}}"
 mkdir -p "${LOG_DIR}"
 
 GPUS=(${GPUS:-0 1 2 3 4 5 6 7})
-K_VALUES=(${K_VALUES:-1 2})
+K_VALUES=(${K_VALUES:-1})
 BLOCK_SIZES=(${BLOCK_SIZES:-16 32 64 128})
 LOG_HASH_SIZES=(${LOG_HASH_SIZES:-10 11 12 13 14 15 16})
 
@@ -58,8 +55,8 @@ EVAL_EVERY="${EVAL_EVERY:-100000}"
 LR="${LR:-1e-3}"
 VAL_SAMPLES="${VAL_SAMPLES:-100000}"
 
-# B-RIM precompute uses a denser candidate pool, then training selects 13 levels.
-PRECOMPUTE_LEVELS="${PRECOMPUTE_LEVELS:-200}"
+# The paper uses 30 candidate frequency bands on Kodak, then selects 13 levels.
+PRECOMPUTE_LEVELS="${PRECOMPUTE_LEVELS:-30}"
 PRECOMPUTE_NUM_CANDIDATES="${PRECOMPUTE_NUM_CANDIDATES:-${PRECOMPUTE_LEVELS}}"
 PRECOMPUTE_DTYPE="${PRECOMPUTE_DTYPE:-float16}"
 MAX_RESOLUTION="${MAX_RESOLUTION:-auto}"
@@ -71,7 +68,7 @@ RIM_MAX_INIT_ITERS="${RIM_MAX_INIT_ITERS:-20}"
 RIM_INIT_TOL="${RIM_INIT_TOL:-1e-6}"
 RIM_INIT_SCHEDULER="${RIM_INIT_SCHEDULER:-geometric}"
 RIM_GATE_SOLVER="${RIM_GATE_SOLVER:-exact_fractional}"
-GATE_MODE="${GATE_MODE:-trainable_sigmoid}"
+GATE_MODE="${GATE_MODE:-fixed_binary}"
 FALLBACK_MODE="${FALLBACK_MODE:-blockwise}"
 GATE_TEMPERATURE="${GATE_TEMPERATURE:-1.0}"
 GATE_INIT_LOGIT="${GATE_INIT_LOGIT:-2.5}"
@@ -110,10 +107,15 @@ load_images() {
       if [[ "${item}" = /* ]]; then
         IMAGES+=("${item}")
       else
-        IMAGES+=("${SCRIPT_DIR}/${item#./}")
+        IMAGES+=("${REPO_DIR}/${item#./}")
       fi
     done
   else
+    if [[ ! -d "${KODAK_DIR}" ]]; then
+      echo "ERROR: Kodak directory not found: ${KODAK_DIR}" >&2
+      echo "Download the dataset as described in README.md or set KODAK_DIR." >&2
+      exit 1
+    fi
     mapfile -t IMAGES < <(find "${KODAK_DIR}" -maxdepth 1 -type f -name "*.png" | sort -V)
   fi
 
@@ -227,7 +229,7 @@ run_fit_job() {
 
   if [[ ! -f "${info_pt}" ]]; then
     echo "ERROR: missing block info file: ${info_pt}" >&2
-    echo "Run ./run_rim_kodak_grid.sh precompute first." >&2
+    echo "Run bash scripts/run_rim_kodak_grid.sh precompute first." >&2
     return 1
   fi
 
@@ -405,7 +407,7 @@ run_single_gpu_stage() {
 
 run_summary() {
   local python_bin="${PYTHON_BIN:-python3}"
-  "${python_bin}" "${SCRIPT_DIR}/summarize_rim_kodak_results.py" \
+  "${python_bin}" "${REPO_DIR}/summarize_rim_kodak_results.py" \
     --log-dir "${LOG_DIR}" \
     --run-prefix "${RUN_PREFIX}" \
     --expected-runs "${#IMAGES[@]}"
