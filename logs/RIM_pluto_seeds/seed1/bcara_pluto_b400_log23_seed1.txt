@@ -1,0 +1,81 @@
+Reproduction seed: 1
+
+Using device: cuda
+[RIM] iterative initialization
+[RIM] info tensor: A=(400, 200) blocks=400 layout=20x20 candidates=200 levels=16
+[RIM] init setup: blocks=400 (20x20), bands=200, levels=16, candidates=200, max_iters=20, tol=1e-06, scheduler=geometric, gate_solver=exact_fractional, device=cuda
+[RIM] init start partition=[(0, 8), (9, 17), (18, 27), (28, 37), (38, 47), (48, 58), (59, 70), (71, 82), (83, 94), (95, 107), (108, 121), (122, 135), (136, 150), (151, 166), (167, 182), (183, 199)] resolutions=[383, 742, 1141, 1540, 1938, 2377, 2856, 3334, 3813, 4331, 4889, 5448, 6046, 6684, 7322, 8000]
+[RIM] init iter 1/20: solving gates
+[RIM] init iter 1/20: gate mean/min/max=0.4884/0.0000/1.0000; solving scheduler DP
+[RIM] init iter 1/20: objective=157453, improvement=n/a, partition=[(0, 11), (12, 24), (25, 34), (35, 44), (45, 54), (55, 63), (64, 73), (74, 83), (84, 94), (95, 106), (107, 118), (119, 131), (132, 146), (147, 163), (164, 180), (181, 199)], resolutions=[503, 1021, 1420, 1819, 2217, 2576, 2975, 3374, 3813, 4291, 4770, 5288, 5886, 6564, 7242, 8000]
+[RIM] init iter 2/20: solving gates
+[RIM] init iter 2/20: gate mean/min/max=0.4866/0.0000/1.0000; solving scheduler DP
+[RIM] init iter 2/20: objective=157481, improvement=28.3001, partition=[(0, 11), (12, 24), (25, 35), (36, 45), (46, 54), (55, 63), (64, 73), (74, 83), (84, 94), (95, 105), (106, 117), (118, 130), (131, 145), (146, 162), (163, 180), (181, 199)], resolutions=[503, 1021, 1460, 1859, 2217, 2576, 2975, 3374, 3813, 4251, 4730, 5248, 5847, 6524, 7242, 8000]
+[RIM] init iter 3/20: solving gates
+[RIM] init iter 3/20: gate mean/min/max=0.4870/0.0000/1.0000; solving scheduler DP
+[RIM] init iter 3/20: objective=157482, improvement=1.02103, partition=[(0, 11), (12, 24), (25, 35), (36, 45), (46, 54), (55, 63), (64, 73), (74, 83), (84, 94), (95, 105), (106, 117), (118, 130), (131, 145), (146, 162), (163, 180), (181, 199)], resolutions=[503, 1021, 1460, 1859, 2217, 2576, 2975, 3374, 3813, 4251, 4730, 5248, 5847, 6524, 7242, 8000]
+[RIM] init converged at iter 3: partition unchanged
+[RIM] init final: recomputing gates for selected partition
+[RIM] init final: objective=157482, partition=[(0, 11), (12, 24), (25, 35), (36, 45), (46, 54), (55, 63), (64, 73), (74, 83), (84, 94), (95, 105), (106, 117), (118, 130), (131, 145), (146, 162), (163, 180), (181, 199)], resolutions=[503, 1021, 1460, 1859, 2217, 2576, 2975, 3374, 3813, 4251, 4730, 5248, 5847, 6524, 7242, 8000]
+[RIM] selected partition: [(0, 11), (12, 24), (25, 35), (36, 45), (46, 54), (55, 63), (64, 73), (74, 83), (84, 94), (95, 105), (106, 117), (118, 130), (131, 145), (146, 162), (163, 180), (181, 199)]
+[RIM] selected resolutions: [503, 1021, 1460, 1859, 2217, 2576, 2975, 3374, 3813, 4251, 4730, 5248, 5847, 6524, 7242, 8000]
+[RIM] objective history: [157453.09058627914, 157481.3906884927, 157482.4117188572, 157482.4117188572]
+[RIM] gate_mode=trainable_sigmoid fallback_mode=blockwise
+[RIM] avg gate per level: [0.7275, 0.64, 0.625, 0.605, 0.59, 0.5825, 0.5575, 0.5225, 0.4775, 0.455, 0.4225, 0.38, 0.3375, 0.3175, 0.285, 0.2675]
+[RIM] active blocks per level@threshold: [291, 256, 250, 242, 236, 233, 223, 209, 191, 182, 169, 152, 135, 127, 114, 107]
+[RIM] saved init state: runs/bcara_pluto_b400_log23_seed1/bcara_pluto_b400_log23_seed1_bcara_init.pt
+Loaded shuffled image (uint8): 8000x8000
+Estimated active hash parameters: 178,974,997
+Encoder trainable parameters: 268,454,656
+MLP trainable parameters: 21,123
+Total trainable parameters: 268,475,779
+[     1/31000] loss=0.228348  train_PSNR= 6.41 dB  val_PSNR= 6.58 dB  gate_mean=0.4890
+[  1000/31000] loss=0.000018  train_PSNR=47.35 dB  val_PSNR=47.36 dB  gate_mean=0.4838
+[  2000/31000] loss=0.000008  train_PSNR=50.90 dB  val_PSNR=50.82 dB  gate_mean=0.4814
+[  3000/31000] loss=0.000005  train_PSNR=53.16 dB  val_PSNR=53.33 dB  gate_mean=0.4789
+[  4000/31000] loss=0.000004  train_PSNR=53.95 dB  val_PSNR=53.76 dB  gate_mean=0.4764
+[  5000/31000] loss=0.000004  train_PSNR=53.71 dB  val_PSNR=54.39 dB  gate_mean=0.4741
+[  6000/31000] loss=0.000008  train_PSNR=50.88 dB  val_PSNR=53.31 dB  gate_mean=0.4720
+[  7000/31000] loss=0.000002  train_PSNR=56.67 dB  val_PSNR=56.33 dB  gate_mean=0.4702
+[  8000/31000] loss=0.000002  train_PSNR=57.32 dB  val_PSNR=56.85 dB  gate_mean=0.4685
+[  9000/31000] loss=0.000002  train_PSNR=56.17 dB  val_PSNR=54.96 dB  gate_mean=0.4670
+[ 10000/31000] loss=0.000001  train_PSNR=58.65 dB  val_PSNR=58.62 dB  gate_mean=0.4657
+[ 11000/31000] loss=0.000003  train_PSNR=54.60 dB  val_PSNR=56.72 dB  gate_mean=0.4646
+[ 12000/31000] loss=0.000001  train_PSNR=60.36 dB  val_PSNR=60.22 dB  gate_mean=0.4636
+[ 13000/31000] loss=0.000002  train_PSNR=56.13 dB  val_PSNR=59.74 dB  gate_mean=0.4627
+[ 14000/31000] loss=0.000001  train_PSNR=60.96 dB  val_PSNR=61.92 dB  gate_mean=0.4620
+[ 15000/31000] loss=0.000002  train_PSNR=57.08 dB  val_PSNR=58.02 dB  gate_mean=0.4613
+[ 16000/31000] loss=0.000001  train_PSNR=62.94 dB  val_PSNR=62.12 dB  gate_mean=0.4608
+[ 17000/31000] loss=0.000001  train_PSNR=61.17 dB  val_PSNR=62.22 dB  gate_mean=0.4603
+[ 18000/31000] loss=0.000000  train_PSNR=66.15 dB  val_PSNR=65.86 dB  gate_mean=0.4599
+[ 19000/31000] loss=0.000000  train_PSNR=66.39 dB  val_PSNR=64.64 dB  gate_mean=0.4596
+[ 20000/31000] loss=0.000000  train_PSNR=65.74 dB  val_PSNR=65.83 dB  gate_mean=0.4593
+[ 21000/31000] loss=0.000000  train_PSNR=69.20 dB  val_PSNR=68.60 dB  gate_mean=0.4590
+[ 22000/31000] loss=0.000000  train_PSNR=69.64 dB  val_PSNR=69.82 dB  gate_mean=0.4588
+[ 23000/31000] loss=0.000000  train_PSNR=66.98 dB  val_PSNR=68.21 dB  gate_mean=0.4586
+[ 24000/31000] loss=0.000000  train_PSNR=72.10 dB  val_PSNR=71.33 dB  gate_mean=0.4585
+[ 25000/31000] loss=0.000000  train_PSNR=71.73 dB  val_PSNR=72.04 dB  gate_mean=0.4583
+[ 26000/31000] loss=0.000000  train_PSNR=74.91 dB  val_PSNR=74.71 dB  gate_mean=0.4582
+[ 27000/31000] loss=0.000000  train_PSNR=74.31 dB  val_PSNR=74.08 dB  gate_mean=0.4581
+[ 28000/31000] loss=0.000000  train_PSNR=75.78 dB  val_PSNR=75.52 dB  gate_mean=0.4580
+[ 29000/31000] loss=0.000000  train_PSNR=76.12 dB  val_PSNR=75.86 dB  gate_mean=0.4579
+[ 30000/31000] loss=0.000000  train_PSNR=76.20 dB  val_PSNR=75.98 dB  gate_mean=0.4579
+[ 31000/31000] loss=0.000000  train_PSNR=76.21 dB  val_PSNR=75.99 dB  gate_mean=0.4579
+  with torch.cuda.amp.autocast(enabled=use_amp):
+Training time: 9465.94s
+Done.
+[metrics] tile 1/1024
+  with torch.cuda.amp.autocast(enabled=use_amp):
+[metrics] tile 100/1024
+[metrics] tile 200/1024
+[metrics] tile 300/1024
+[metrics] tile 400/1024
+[metrics] tile 500/1024
+[metrics] tile 600/1024
+[metrics] tile 700/1024
+[metrics] tile 800/1024
+[metrics] tile 900/1024
+[metrics] tile 1000/1024
+[metrics] tile 1024/1024
+Metrics: PSNR(image)=84.3376 dB  SSIM(image)=0.999996  MS-SSIM(image)=0.999999  PSNR(patch_mean)=109.1253 dB  SSIM(p05/p50/p95)=1.0000/1.0000/1.0000  tiles=1024  tile_size=256
+{'PSNR(dB)_image': 84.33763148017346, 'PSNR(dB)_mean': 109.12529384344816, 'PSNR(dB)_std': 17.183852576251777, 'PSNR(dB)_min': 69.82503509521484, 'PSNR(dB)_max': 120.0, 'PSNR(dB)_p05': 75.94363288879394, 'PSNR(dB)_p50': 120.0, 'PSNR(dB)_p95': 120.0, 'PSNR(dB)_inf_count': 0, 'MSE_image': 3.6832979557624057e-09, 'SSIM_image': 0.9999964782168714, 'SSIM_mean': 0.9999964782168715, 'SSIM_std': 1.0188205208285236e-05, 'SSIM_min': 0.999900903454014, 'SSIM_max': 1.0, 'SSIM_p05': 0.9999748313305418, 'SSIM_p50': 1.0, 'SSIM_p95': 1.0, 'MS_SSIM_image': 0.9999994661775418, 'MS_SSIM_mean': 0.9999994661775418, 'MS_SSIM_std': 1.6794336503293536e-06, 'MS_SSIM_min': 0.9999798536300659, 'MS_SSIM_max': 1.0000009536743164, 'MS_SSIM_p05': 0.9999961853027344, 'MS_SSIM_p50': 1.0, 'MS_SSIM_p95': 1.0, 'LPIPS_mean': None, 'LPIPS_image': None, 'tiles_used': 1024, 'tile_size': 256, 'tile_stride': 256, 'metrics_mode': 'grid', 'data_range_ssim': 255.0, 'data_range_ms_ssim': 1.0, 'normalization': 'SSIM uses uint8 HWC with data_range=255; PSNR/MS-SSIM use NCHW float tensors in [0,1].', 'diagnostics': {'pred_shape': [3, 8000, 8000], 'gt_shape': [3, 8000, 8000], 'pred_dtype': 'torch.uint8/generated_tiles', 'gt_dtype': 'torch.uint8', 'pred_min': 0, 'pred_max': 255, 'gt_min': 0, 'gt_max': 255, 'pred_nonfinite_count': 0, 'gt_nonfinite_count': 0, 'pred_has_nan_or_inf': False, 'gt_has_nan_or_inf': False}, 'psnr': 84.33763148017346, 'psnr_patch_mean': 109.12529384344816, 'psnr_patch_std': 17.183852576251777, 'ssim': 0.9999964782168714, 'ssim_patch_mean': 0.9999964782168715, 'ssim_patch_std': 1.0188205208285236e-05, 'ms_ssim': 0.9999994661775418, 'ms_ssim_patch_mean': 0.9999994661775418, 'ms_ssim_patch_std': 1.6794336503293536e-06, 'lpips': None}

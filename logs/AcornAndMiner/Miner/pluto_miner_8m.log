@@ -1,0 +1,387 @@
+BATCH_SIZE scale=1/3 configured_blocks=609 effective_blocks=609 pixels=974400
+VRAM_PROBE {"label": "MINER scale 1: blocks per optimizer step", "batch": 609, "peak_device_gib": 1.7518310546875, "peak_allocated_gib": 1.2209382057189941, "fits_target": true, "oom": false}
+VRAM_BATCH {"label": "MINER scale 1: blocks per optimizer step", "target_gib": 30.0, "selected_batch": 609, "peak_device_gib": 1.7518310546875, "peak_allocated_gib": 1.2209382057189941, "available_batch": 609, "all_available_fit": true}
+step=1/31000 loss=0.24385776 elapsed=1.7s scale=1/3
+step=100/31000 loss=0.00000025 elapsed=3.2s scale=1/3
+step=200/31000 loss=0.00000003 elapsed=4.6s scale=1/3
+step=300/31000 loss=0.00000000 elapsed=6.2s scale=1/3
+step=400/31000 loss=0.00000000 elapsed=7.6s scale=1/3
+step=500/31000 loss=0.00000000 elapsed=9.0s scale=1/3
+step=600/31000 loss=0.00000000 elapsed=10.7s scale=1/3
+step=700/31000 loss=0.00000000 elapsed=12.4s scale=1/3
+step=800/31000 loss=0.00000000 elapsed=14.0s scale=1/3
+step=900/31000 loss=0.00000000 elapsed=16.1s scale=1/3
+step=1000/31000 loss=0.00000000 elapsed=17.7s scale=1/3
+METRICS {"step": 1000, "scale": 0, "parameters": 5767500, "mse": 0.00084636062526461, "psnr": 30.72444549264551, "ssim": 0.872719880642254}
+step=1100/31000 loss=0.00000000 elapsed=35.9s scale=1/3
+step=1200/31000 loss=0.00000000 elapsed=37.4s scale=1/3
+step=1300/31000 loss=0.00000000 elapsed=39.0s scale=1/3
+step=1400/31000 loss=0.00000000 elapsed=40.6s scale=1/3
+step=1500/31000 loss=0.00000000 elapsed=42.2s scale=1/3
+step=1600/31000 loss=0.00000000 elapsed=43.9s scale=1/3
+step=1700/31000 loss=0.00000000 elapsed=45.5s scale=1/3
+step=1800/31000 loss=0.00000000 elapsed=47.1s scale=1/3
+step=1900/31000 loss=0.00000000 elapsed=48.7s scale=1/3
+step=2000/31000 loss=0.00000000 elapsed=50.3s scale=1/3
+METRICS {"step": 2000, "scale": 0, "parameters": 5767500, "mse": 0.0007276921201615401, "psnr": 31.38052327825408, "ssim": 0.8898632146553038}
+step=2100/31000 loss=0.00000000 elapsed=69.3s scale=1/3
+step=2200/31000 loss=0.00000000 elapsed=71.0s scale=1/3
+step=2300/31000 loss=0.00000000 elapsed=72.6s scale=1/3
+step=2400/31000 loss=0.00000000 elapsed=74.3s scale=1/3
+step=2500/31000 loss=0.00000000 elapsed=75.9s scale=1/3
+step=2600/31000 loss=0.00000000 elapsed=77.6s scale=1/3
+step=2700/31000 loss=0.00000000 elapsed=79.2s scale=1/3
+step=2800/31000 loss=0.00000000 elapsed=80.8s scale=1/3
+step=2900/31000 loss=0.00000000 elapsed=82.4s scale=1/3
+step=3000/31000 loss=0.00000000 elapsed=84.0s scale=1/3
+METRICS {"step": 3000, "scale": 0, "parameters": 5767500, "mse": 0.000705834740145127, "psnr": 31.512969701159875, "ssim": 0.8939935868252404}
+step=3100/31000 loss=0.00000000 elapsed=103.1s scale=1/3
+step=3200/31000 loss=0.00000000 elapsed=104.7s scale=1/3
+step=3300/31000 loss=0.00000000 elapsed=106.2s scale=1/3
+step=3400/31000 loss=0.00000000 elapsed=107.9s scale=1/3
+step=3500/31000 loss=0.00000000 elapsed=109.5s scale=1/3
+step=3600/31000 loss=0.00000000 elapsed=111.1s scale=1/3
+step=3700/31000 loss=0.00000000 elapsed=112.8s scale=1/3
+step=3800/31000 loss=0.00000000 elapsed=114.4s scale=1/3
+step=3900/31000 loss=0.00000000 elapsed=116.1s scale=1/3
+step=4000/31000 loss=0.00000000 elapsed=117.7s scale=1/3
+METRICS {"step": 4000, "scale": 0, "parameters": 5767500, "mse": 0.0006977568859945876, "psnr": 31.562958688705812, "ssim": 0.8955835127457884}
+step=4100/31000 loss=0.00000000 elapsed=138.5s scale=1/3
+step=4200/31000 loss=0.00000000 elapsed=140.1s scale=1/3
+step=4300/31000 loss=0.00000000 elapsed=141.8s scale=1/3
+step=4400/31000 loss=0.00000000 elapsed=143.4s scale=1/3
+step=4500/31000 loss=0.00000000 elapsed=145.0s scale=1/3
+step=4600/31000 loss=0.00000000 elapsed=146.6s scale=1/3
+step=4700/31000 loss=0.00000000 elapsed=148.3s scale=1/3
+step=4800/31000 loss=0.00000000 elapsed=149.9s scale=1/3
+step=4900/31000 loss=0.00000000 elapsed=151.6s scale=1/3
+step=5000/31000 loss=0.00000000 elapsed=153.2s scale=1/3
+METRICS {"step": 5000, "scale": 0, "parameters": 5767500, "mse": 0.0006939143564483913, "psnr": 31.586941272642676, "ssim": 0.8963428201424823}
+step=5100/31000 loss=0.00000000 elapsed=172.2s scale=1/3
+step=5200/31000 loss=0.00000000 elapsed=173.8s scale=1/3
+step=5300/31000 loss=0.00000000 elapsed=175.5s scale=1/3
+step=5400/31000 loss=0.00000000 elapsed=177.1s scale=1/3
+step=5500/31000 loss=0.00000000 elapsed=178.7s scale=1/3
+step=5600/31000 loss=0.00000000 elapsed=180.4s scale=1/3
+step=5700/31000 loss=0.00000000 elapsed=182.0s scale=1/3
+step=5800/31000 loss=0.00000000 elapsed=183.6s scale=1/3
+step=5900/31000 loss=0.00000000 elapsed=185.2s scale=1/3
+step=6000/31000 loss=0.00000000 elapsed=186.9s scale=1/3
+METRICS {"step": 6000, "scale": 0, "parameters": 5767500, "mse": 0.0006916604840496711, "psnr": 31.60107035727135, "ssim": 0.896782852680115}
+step=6100/31000 loss=0.00000000 elapsed=205.9s scale=1/3
+step=6200/31000 loss=0.00000000 elapsed=207.5s scale=1/3
+step=6300/31000 loss=0.00000000 elapsed=209.1s scale=1/3
+step=6400/31000 loss=0.00000000 elapsed=210.8s scale=1/3
+step=6500/31000 loss=0.00000000 elapsed=212.4s scale=1/3
+step=6600/31000 loss=0.00000000 elapsed=214.1s scale=1/3
+step=6700/31000 loss=0.00000000 elapsed=215.7s scale=1/3
+step=6800/31000 loss=0.00000000 elapsed=217.4s scale=1/3
+step=6900/31000 loss=0.00000000 elapsed=219.0s scale=1/3
+step=7000/31000 loss=0.00000000 elapsed=220.7s scale=1/3
+METRICS {"step": 7000, "scale": 0, "parameters": 5767500, "mse": 0.000690192185376456, "psnr": 31.61029962267216, "ssim": 0.8970557483794139}
+step=7100/31000 loss=0.00000000 elapsed=239.5s scale=1/3
+step=7200/31000 loss=0.00000000 elapsed=241.1s scale=1/3
+step=7300/31000 loss=0.00000000 elapsed=242.8s scale=1/3
+step=7400/31000 loss=0.00000000 elapsed=244.4s scale=1/3
+step=7500/31000 loss=0.00000000 elapsed=246.1s scale=1/3
+step=7600/31000 loss=0.00000000 elapsed=247.8s scale=1/3
+step=7700/31000 loss=0.00000000 elapsed=249.4s scale=1/3
+step=7800/31000 loss=0.00000000 elapsed=251.1s scale=1/3
+step=7900/31000 loss=0.00000000 elapsed=252.8s scale=1/3
+step=8000/31000 loss=0.00000000 elapsed=254.4s scale=1/3
+METRICS {"step": 8000, "scale": 0, "parameters": 5767500, "mse": 0.0006891562042354802, "psnr": 31.616823296906603, "ssim": 0.8972390749133431}
+step=8100/31000 loss=0.00000000 elapsed=273.3s scale=1/3
+step=8200/31000 loss=0.00000000 elapsed=274.9s scale=1/3
+step=8300/31000 loss=0.00000000 elapsed=276.5s scale=1/3
+step=8400/31000 loss=0.00000000 elapsed=278.1s scale=1/3
+step=8500/31000 loss=0.00000000 elapsed=279.7s scale=1/3
+step=8600/31000 loss=0.00000000 elapsed=281.3s scale=1/3
+step=8700/31000 loss=0.00000000 elapsed=282.9s scale=1/3
+step=8800/31000 loss=0.00000000 elapsed=284.6s scale=1/3
+step=8900/31000 loss=0.00000000 elapsed=286.2s scale=1/3
+step=9000/31000 loss=0.00000000 elapsed=287.8s scale=1/3
+METRICS {"step": 9000, "scale": 0, "parameters": 5767500, "mse": 0.0006883875654867519, "psnr": 31.621669830412547, "ssim": 0.8973699464636203}
+step=9100/31000 loss=0.00000000 elapsed=306.8s scale=1/3
+step=9200/31000 loss=0.00000000 elapsed=308.4s scale=1/3
+step=9300/31000 loss=0.00000000 elapsed=310.1s scale=1/3
+step=9400/31000 loss=0.00000000 elapsed=311.7s scale=1/3
+step=9500/31000 loss=0.00000000 elapsed=313.3s scale=1/3
+step=9600/31000 loss=0.00000000 elapsed=314.9s scale=1/3
+step=9700/31000 loss=0.00000000 elapsed=316.6s scale=1/3
+step=9800/31000 loss=0.00000000 elapsed=318.2s scale=1/3
+step=9900/31000 loss=0.00000000 elapsed=319.9s scale=1/3
+step=10000/31000 loss=0.00000000 elapsed=321.5s scale=1/3
+METRICS {"step": 10000, "scale": 0, "parameters": 5767500, "mse": 0.0006877922828360132, "psnr": 31.625427013557292, "ssim": 0.897467442013235}
+step=10100/31000 loss=0.00000000 elapsed=340.5s scale=1/3
+step=10200/31000 loss=0.00000000 elapsed=342.2s scale=1/3
+step=10300/31000 loss=0.00000000 elapsed=343.8s scale=1/3
+BATCH_SIZE scale=2/3 configured_blocks=1512 effective_blocks=1512 pixels=2419200
+VRAM_PROBE {"label": "MINER scale 2: blocks per optimizer step", "batch": 1512, "peak_device_gib": 1.9412841796875, "peak_allocated_gib": 1.2478837966918945, "fits_target": true, "oom": false}
+VRAM_BATCH {"label": "MINER scale 2: blocks per optimizer step", "target_gib": 30.0, "selected_batch": 1512, "peak_device_gib": 1.9412841796875, "peak_allocated_gib": 1.2478837966918945, "available_batch": 1512, "all_available_fit": true}
+step=10400/31000 loss=0.00134780 elapsed=349.7s scale=2/3
+step=10500/31000 loss=0.00117046 elapsed=351.6s scale=2/3
+step=10600/31000 loss=0.00113843 elapsed=353.4s scale=2/3
+step=10700/31000 loss=0.00112786 elapsed=355.1s scale=2/3
+step=10800/31000 loss=0.00112269 elapsed=356.9s scale=2/3
+step=10900/31000 loss=0.00112029 elapsed=358.7s scale=2/3
+step=11000/31000 loss=0.00111908 elapsed=360.4s scale=2/3
+METRICS {"step": 11000, "scale": 1, "parameters": 6295170, "mse": 0.0005530233951179797, "psnr": 32.57256495900136, "ssim": 0.9091948715430903}
+step=11100/31000 loss=0.00111834 elapsed=380.3s scale=2/3
+step=11200/31000 loss=0.00111784 elapsed=382.0s scale=2/3
+step=11300/31000 loss=0.00111752 elapsed=383.8s scale=2/3
+step=11400/31000 loss=0.00111725 elapsed=385.6s scale=2/3
+step=11500/31000 loss=0.00111708 elapsed=387.4s scale=2/3
+step=11600/31000 loss=0.00111702 elapsed=389.1s scale=2/3
+step=11700/31000 loss=0.00111695 elapsed=390.9s scale=2/3
+step=11800/31000 loss=0.00111690 elapsed=392.7s scale=2/3
+step=11900/31000 loss=0.00111688 elapsed=394.4s scale=2/3
+step=12000/31000 loss=0.00111685 elapsed=396.2s scale=2/3
+METRICS {"step": 12000, "scale": 1, "parameters": 6295170, "mse": 0.0005521880635459008, "psnr": 32.57912985585524, "ssim": 0.9092931860975153}
+step=12100/31000 loss=0.00111681 elapsed=416.0s scale=2/3
+step=12200/31000 loss=0.00111678 elapsed=417.7s scale=2/3
+step=12300/31000 loss=0.00111675 elapsed=419.5s scale=2/3
+step=12400/31000 loss=0.00111674 elapsed=421.3s scale=2/3
+step=12500/31000 loss=0.00111672 elapsed=423.2s scale=2/3
+step=12600/31000 loss=0.00111669 elapsed=425.0s scale=2/3
+step=12700/31000 loss=0.00111668 elapsed=426.8s scale=2/3
+step=12800/31000 loss=0.00111668 elapsed=428.5s scale=2/3
+step=12900/31000 loss=0.00111667 elapsed=430.3s scale=2/3
+step=13000/31000 loss=0.00111667 elapsed=432.1s scale=2/3
+METRICS {"step": 13000, "scale": 1, "parameters": 6295170, "mse": 0.000552116337055957, "psnr": 32.57969401948288, "ssim": 0.9093015524808716}
+step=13100/31000 loss=0.00111666 elapsed=451.8s scale=2/3
+step=13200/31000 loss=0.00111665 elapsed=453.5s scale=2/3
+step=13300/31000 loss=0.00111664 elapsed=455.3s scale=2/3
+step=13400/31000 loss=0.00111663 elapsed=457.1s scale=2/3
+step=13500/31000 loss=0.00111662 elapsed=458.9s scale=2/3
+step=13600/31000 loss=0.00111662 elapsed=460.6s scale=2/3
+step=13700/31000 loss=0.00111661 elapsed=462.4s scale=2/3
+step=13800/31000 loss=0.00111660 elapsed=464.2s scale=2/3
+step=13900/31000 loss=0.00111659 elapsed=465.9s scale=2/3
+step=14000/31000 loss=0.00111659 elapsed=467.7s scale=2/3
+METRICS {"step": 14000, "scale": 1, "parameters": 6295170, "mse": 0.0005520885726179963, "psnr": 32.579912419928235, "ssim": 0.9093062288149408}
+step=14100/31000 loss=0.00111658 elapsed=487.8s scale=2/3
+step=14200/31000 loss=0.00111658 elapsed=489.6s scale=2/3
+step=14300/31000 loss=0.00111658 elapsed=491.4s scale=2/3
+step=14400/31000 loss=0.00111658 elapsed=493.2s scale=2/3
+step=14500/31000 loss=0.00111658 elapsed=495.0s scale=2/3
+step=14600/31000 loss=0.00111658 elapsed=496.7s scale=2/3
+step=14700/31000 loss=0.00111657 elapsed=498.5s scale=2/3
+step=14800/31000 loss=0.00111657 elapsed=500.2s scale=2/3
+step=14900/31000 loss=0.00111657 elapsed=502.0s scale=2/3
+step=15000/31000 loss=0.00111657 elapsed=503.8s scale=2/3
+METRICS {"step": 15000, "scale": 1, "parameters": 6295170, "mse": 0.0005520816774845113, "psnr": 32.57996666008593, "ssim": 0.909306995330443}
+step=15100/31000 loss=0.00111657 elapsed=523.4s scale=2/3
+step=15200/31000 loss=0.00111657 elapsed=525.1s scale=2/3
+step=15300/31000 loss=0.00111656 elapsed=526.9s scale=2/3
+step=15400/31000 loss=0.00111656 elapsed=528.6s scale=2/3
+step=15500/31000 loss=0.00111656 elapsed=530.4s scale=2/3
+step=15600/31000 loss=0.00111653 elapsed=532.2s scale=2/3
+step=15700/31000 loss=0.00111653 elapsed=533.9s scale=2/3
+step=15800/31000 loss=0.00111653 elapsed=535.7s scale=2/3
+step=15900/31000 loss=0.00111652 elapsed=537.5s scale=2/3
+step=16000/31000 loss=0.00111652 elapsed=539.2s scale=2/3
+METRICS {"step": 16000, "scale": 1, "parameters": 6295170, "mse": 0.0005520685227475286, "psnr": 32.580070142921535, "ssim": 0.9093075815800883}
+step=16100/31000 loss=0.00111651 elapsed=558.8s scale=2/3
+step=16200/31000 loss=0.00111651 elapsed=560.6s scale=2/3
+step=16300/31000 loss=0.00111651 elapsed=562.4s scale=2/3
+step=16400/31000 loss=0.00111651 elapsed=564.1s scale=2/3
+step=16500/31000 loss=0.00111651 elapsed=565.9s scale=2/3
+step=16600/31000 loss=0.00111650 elapsed=567.6s scale=2/3
+step=16700/31000 loss=0.00111650 elapsed=569.4s scale=2/3
+step=16800/31000 loss=0.00111650 elapsed=571.2s scale=2/3
+step=16900/31000 loss=0.00111650 elapsed=572.9s scale=2/3
+step=17000/31000 loss=0.00111650 elapsed=574.7s scale=2/3
+METRICS {"step": 17000, "scale": 1, "parameters": 6295170, "mse": 0.0005520636800527959, "psnr": 32.5801082390045, "ssim": 0.9093080665147566}
+step=17100/31000 loss=0.00111650 elapsed=594.3s scale=2/3
+step=17200/31000 loss=0.00111650 elapsed=596.1s scale=2/3
+step=17300/31000 loss=0.00111650 elapsed=597.9s scale=2/3
+step=17400/31000 loss=0.00111650 elapsed=599.6s scale=2/3
+step=17500/31000 loss=0.00111650 elapsed=601.4s scale=2/3
+step=17600/31000 loss=0.00111650 elapsed=603.1s scale=2/3
+step=17700/31000 loss=0.00111650 elapsed=604.9s scale=2/3
+step=17800/31000 loss=0.00111650 elapsed=606.6s scale=2/3
+step=17900/31000 loss=0.00111650 elapsed=608.4s scale=2/3
+step=18000/31000 loss=0.00111650 elapsed=610.1s scale=2/3
+METRICS {"step": 18000, "scale": 1, "parameters": 6295170, "mse": 0.0005520623445003016, "psnr": 32.580118745469626, "ssim": 0.9093082676420784}
+step=18100/31000 loss=0.00111650 elapsed=629.6s scale=2/3
+step=18200/31000 loss=0.00111650 elapsed=631.4s scale=2/3
+step=18300/31000 loss=0.00111650 elapsed=633.1s scale=2/3
+step=18400/31000 loss=0.00111650 elapsed=634.9s scale=2/3
+step=18500/31000 loss=0.00111650 elapsed=636.6s scale=2/3
+step=18600/31000 loss=0.00111650 elapsed=638.4s scale=2/3
+step=18700/31000 loss=0.00111650 elapsed=640.1s scale=2/3
+step=18800/31000 loss=0.00111650 elapsed=641.9s scale=2/3
+step=18900/31000 loss=0.00111650 elapsed=643.7s scale=2/3
+step=19000/31000 loss=0.00111650 elapsed=645.4s scale=2/3
+METRICS {"step": 19000, "scale": 1, "parameters": 6295170, "mse": 0.0005520615361895324, "psnr": 32.58012510426528, "ssim": 0.909308331179074}
+step=19100/31000 loss=0.00111650 elapsed=664.9s scale=2/3
+step=19200/31000 loss=0.00111650 elapsed=666.7s scale=2/3
+step=19300/31000 loss=0.00111649 elapsed=668.4s scale=2/3
+step=19400/31000 loss=0.00111649 elapsed=670.2s scale=2/3
+step=19500/31000 loss=0.00111649 elapsed=671.9s scale=2/3
+step=19600/31000 loss=0.00111649 elapsed=673.7s scale=2/3
+step=19700/31000 loss=0.00111649 elapsed=675.4s scale=2/3
+step=19800/31000 loss=0.00111649 elapsed=677.2s scale=2/3
+step=19900/31000 loss=0.00111649 elapsed=679.0s scale=2/3
+step=20000/31000 loss=0.00111649 elapsed=680.7s scale=2/3
+METRICS {"step": 20000, "scale": 1, "parameters": 6295170, "mse": 0.0005520599899645222, "psnr": 32.58013726808917, "ssim": 0.9093085663715345}
+step=20100/31000 loss=0.00111649 elapsed=700.3s scale=2/3
+step=20200/31000 loss=0.00111649 elapsed=702.1s scale=2/3
+step=20300/31000 loss=0.00111649 elapsed=703.8s scale=2/3
+step=20400/31000 loss=0.00111649 elapsed=705.6s scale=2/3
+step=20500/31000 loss=0.00111649 elapsed=707.3s scale=2/3
+step=20600/31000 loss=0.00111649 elapsed=709.1s scale=2/3
+BATCH_SIZE scale=3/3 configured_blocks=2256 effective_blocks=2256 pixels=3609600
+VRAM_PROBE {"label": "MINER scale 3: blocks per optimizer step", "batch": 2256, "peak_device_gib": 3.5389404296875, "peak_allocated_gib": 2.8709592819213867, "fits_target": true, "oom": false}
+VRAM_BATCH {"label": "MINER scale 3: blocks per optimizer step", "target_gib": 30.0, "selected_batch": 2256, "peak_device_gib": 3.5389404296875, "peak_allocated_gib": 2.8709592819213867, "available_batch": 2256, "all_available_fit": true}
+step=20700/31000 loss=0.00221366 elapsed=725.9s scale=3/3
+step=20800/31000 loss=0.00192945 elapsed=728.8s scale=3/3
+step=20900/31000 loss=0.00171179 elapsed=731.7s scale=3/3
+step=21000/31000 loss=0.00158748 elapsed=734.5s scale=3/3
+METRICS {"step": 21000, "scale": 2, "parameters": 8477025, "mse": 0.00039683610548980533, "psnr": 34.013888211407455, "ssim": 0.9247315599543312}
+step=21100/31000 loss=0.00152212 elapsed=761.5s scale=3/3
+step=21200/31000 loss=0.00148496 elapsed=764.3s scale=3/3
+step=21300/31000 loss=0.00146200 elapsed=767.2s scale=3/3
+step=21400/31000 loss=0.00144694 elapsed=770.1s scale=3/3
+step=21500/31000 loss=0.00143650 elapsed=773.0s scale=3/3
+step=21600/31000 loss=0.00142899 elapsed=775.8s scale=3/3
+step=21700/31000 loss=0.00142337 elapsed=778.7s scale=3/3
+step=21800/31000 loss=0.00141899 elapsed=781.6s scale=3/3
+step=21900/31000 loss=0.00141546 elapsed=784.5s scale=3/3
+step=22000/31000 loss=0.00141252 elapsed=787.3s scale=3/3
+METRICS {"step": 22000, "scale": 2, "parameters": 8477025, "mse": 0.0003606059245878552, "psnr": 34.42967142298375, "ssim": 0.9288896048860418}
+step=22100/31000 loss=0.00140995 elapsed=814.5s scale=3/3
+step=22200/31000 loss=0.00140797 elapsed=817.3s scale=3/3
+step=22300/31000 loss=0.00140613 elapsed=820.2s scale=3/3
+step=22400/31000 loss=0.00140470 elapsed=823.1s scale=3/3
+step=22500/31000 loss=0.00140352 elapsed=826.0s scale=3/3
+step=22600/31000 loss=0.00140242 elapsed=828.8s scale=3/3
+step=22700/31000 loss=0.00140150 elapsed=831.7s scale=3/3
+step=22800/31000 loss=0.00140067 elapsed=834.6s scale=3/3
+step=22900/31000 loss=0.00139992 elapsed=837.5s scale=3/3
+step=23000/31000 loss=0.00139921 elapsed=840.3s scale=3/3
+METRICS {"step": 23000, "scale": 2, "parameters": 8477025, "mse": 0.0003578033939135764, "psnr": 34.46355544285841, "ssim": 0.9292241410177495}
+step=23100/31000 loss=0.00139858 elapsed=867.7s scale=3/3
+step=23200/31000 loss=0.00139800 elapsed=870.6s scale=3/3
+step=23300/31000 loss=0.00139748 elapsed=873.5s scale=3/3
+step=23400/31000 loss=0.00139698 elapsed=876.4s scale=3/3
+step=23500/31000 loss=0.00139648 elapsed=879.2s scale=3/3
+step=23600/31000 loss=0.00139605 elapsed=882.1s scale=3/3
+step=23700/31000 loss=0.00139568 elapsed=885.0s scale=3/3
+step=23800/31000 loss=0.00139533 elapsed=887.9s scale=3/3
+step=23900/31000 loss=0.00139498 elapsed=890.7s scale=3/3
+step=24000/31000 loss=0.00139469 elapsed=893.6s scale=3/3
+METRICS {"step": 24000, "scale": 2, "parameters": 8477025, "mse": 0.00035694284571755194, "psnr": 34.4740131827613, "ssim": 0.9293319335564576}
+step=24100/31000 loss=0.00139440 elapsed=920.7s scale=3/3
+step=24200/31000 loss=0.00139413 elapsed=923.5s scale=3/3
+step=24300/31000 loss=0.00139390 elapsed=926.4s scale=3/3
+step=24400/31000 loss=0.00139366 elapsed=929.3s scale=3/3
+step=24500/31000 loss=0.00139348 elapsed=932.2s scale=3/3
+step=24600/31000 loss=0.00139330 elapsed=935.0s scale=3/3
+step=24700/31000 loss=0.00139316 elapsed=937.9s scale=3/3
+step=24800/31000 loss=0.00139304 elapsed=940.8s scale=3/3
+step=24900/31000 loss=0.00139291 elapsed=943.7s scale=3/3
+step=25000/31000 loss=0.00139279 elapsed=946.6s scale=3/3
+METRICS {"step": 25000, "scale": 2, "parameters": 8477025, "mse": 0.0003565877840303971, "psnr": 34.478335389482794, "ssim": 0.9293773585055193}
+step=25100/31000 loss=0.00139269 elapsed=973.7s scale=3/3
+step=25200/31000 loss=0.00139255 elapsed=976.6s scale=3/3
+step=25300/31000 loss=0.00139244 elapsed=979.5s scale=3/3
+step=25400/31000 loss=0.00139232 elapsed=982.4s scale=3/3
+step=25500/31000 loss=0.00139220 elapsed=985.3s scale=3/3
+step=25600/31000 loss=0.00139213 elapsed=988.1s scale=3/3
+step=25700/31000 loss=0.00139202 elapsed=991.0s scale=3/3
+step=25800/31000 loss=0.00139193 elapsed=993.9s scale=3/3
+step=25900/31000 loss=0.00139184 elapsed=996.8s scale=3/3
+step=26000/31000 loss=0.00139177 elapsed=999.7s scale=3/3
+METRICS {"step": 26000, "scale": 2, "parameters": 8477025, "mse": 0.00035639630764160727, "psnr": 34.480668040155834, "ssim": 0.9293991426751036}
+step=26100/31000 loss=0.00139168 elapsed=1025.6s scale=3/3
+step=26200/31000 loss=0.00139161 elapsed=1028.5s scale=3/3
+step=26300/31000 loss=0.00139153 elapsed=1031.4s scale=3/3
+step=26400/31000 loss=0.00139147 elapsed=1034.3s scale=3/3
+step=26500/31000 loss=0.00139141 elapsed=1037.1s scale=3/3
+step=26600/31000 loss=0.00139135 elapsed=1040.0s scale=3/3
+step=26700/31000 loss=0.00139129 elapsed=1042.9s scale=3/3
+step=26800/31000 loss=0.00139123 elapsed=1045.8s scale=3/3
+step=26900/31000 loss=0.00139118 elapsed=1048.6s scale=3/3
+step=27000/31000 loss=0.00139113 elapsed=1051.5s scale=3/3
+METRICS {"step": 27000, "scale": 2, "parameters": 8477025, "mse": 0.00035627824669766454, "psnr": 34.482106935838004, "ssim": 0.9294140172521622}
+step=27100/31000 loss=0.00139108 elapsed=1077.5s scale=3/3
+step=27200/31000 loss=0.00139103 elapsed=1080.4s scale=3/3
+step=27300/31000 loss=0.00139098 elapsed=1083.2s scale=3/3
+step=27400/31000 loss=0.00139093 elapsed=1086.1s scale=3/3
+step=27500/31000 loss=0.00139088 elapsed=1089.0s scale=3/3
+step=27600/31000 loss=0.00139081 elapsed=1091.9s scale=3/3
+step=27700/31000 loss=0.00139076 elapsed=1094.8s scale=3/3
+step=27800/31000 loss=0.00139072 elapsed=1097.6s scale=3/3
+step=27900/31000 loss=0.00139068 elapsed=1100.5s scale=3/3
+step=28000/31000 loss=0.00139065 elapsed=1103.4s scale=3/3
+METRICS {"step": 28000, "scale": 2, "parameters": 8477025, "mse": 0.0003561926035003069, "psnr": 34.48315103099485, "ssim": 0.9294249016615386}
+step=28100/31000 loss=0.00139061 elapsed=1130.2s scale=3/3
+step=28200/31000 loss=0.00139058 elapsed=1133.1s scale=3/3
+step=28300/31000 loss=0.00139055 elapsed=1135.9s scale=3/3
+step=28400/31000 loss=0.00139052 elapsed=1138.8s scale=3/3
+step=28500/31000 loss=0.00139049 elapsed=1141.7s scale=3/3
+step=28600/31000 loss=0.00139047 elapsed=1144.6s scale=3/3
+step=28700/31000 loss=0.00139045 elapsed=1147.4s scale=3/3
+step=28800/31000 loss=0.00139042 elapsed=1150.3s scale=3/3
+step=28900/31000 loss=0.00139040 elapsed=1153.2s scale=3/3
+step=29000/31000 loss=0.00139037 elapsed=1156.1s scale=3/3
+METRICS {"step": 29000, "scale": 2, "parameters": 8477025, "mse": 0.00035614203609641036, "psnr": 34.48376762727678, "ssim": 0.9294322037378181}
+step=29100/31000 loss=0.00139035 elapsed=1182.8s scale=3/3
+step=29200/31000 loss=0.00139032 elapsed=1185.7s scale=3/3
+step=29300/31000 loss=0.00139028 elapsed=1188.6s scale=3/3
+step=29400/31000 loss=0.00139025 elapsed=1191.5s scale=3/3
+step=29500/31000 loss=0.00139021 elapsed=1194.3s scale=3/3
+step=29600/31000 loss=0.00139017 elapsed=1197.2s scale=3/3
+step=29700/31000 loss=0.00139014 elapsed=1200.1s scale=3/3
+step=29800/31000 loss=0.00139012 elapsed=1203.0s scale=3/3
+step=29900/31000 loss=0.00139010 elapsed=1205.8s scale=3/3
+step=30000/31000 loss=0.00139008 elapsed=1208.7s scale=3/3
+METRICS {"step": 30000, "scale": 2, "parameters": 8477025, "mse": 0.00035609679693626603, "psnr": 34.484319327541684, "ssim": 0.9294386094607547}
+step=30100/31000 loss=0.00139005 elapsed=1239.1s scale=3/3
+step=30200/31000 loss=0.00139003 elapsed=1242.0s scale=3/3
+step=30300/31000 loss=0.00139002 elapsed=1244.9s scale=3/3
+step=30400/31000 loss=0.00138999 elapsed=1247.8s scale=3/3
+step=30500/31000 loss=0.00138998 elapsed=1250.7s scale=3/3
+step=30600/31000 loss=0.00138996 elapsed=1253.6s scale=3/3
+step=30700/31000 loss=0.00138995 elapsed=1256.4s scale=3/3
+step=30800/31000 loss=0.00138993 elapsed=1259.3s scale=3/3
+step=30900/31000 loss=0.00138992 elapsed=1262.2s scale=3/3
+step=31000/31000 loss=0.00138989 elapsed=1265.1s scale=3/3
+METRICS {"step": 31000, "scale": 2, "parameters": 8477025, "mse": 0.00035606483462686275, "psnr": 34.4847091563108, "ssim": 0.9294434635694168}
+{
+  "model": "MINER",
+  "size": "8m",
+  "requested_steps": 31000,
+  "scale_optimizer_steps": [
+    10333,
+    10333,
+    10334
+  ],
+  "optimizer": "ChannelAdam (independent block states)",
+  "metrics_every": 1000,
+  "resolution": [
+    8000,
+    8000
+  ],
+  "nfeat": 8,
+  "gpu": "Tesla V100-PCIE-32GB",
+  "torch": "2.5.1+cu118",
+  "target_vram_gib": 30.0,
+  "profile_only": false,
+  "batch_blocks_per_scale": [
+    609,
+    1512,
+    2256
+  ],
+  "batch_unit": "blocks",
+  "block_size": 40,
+  "batch_reference_model_size": "103_7m",
+  "completed_steps": 31000,
+  "parameters": 8477025,
+  "step": 31000,
+  "scale": 2,
+  "mse": 0.00035606483462686275,
+  "psnr": 34.4847091563108,
+  "ssim": 0.9294434635694168
+}

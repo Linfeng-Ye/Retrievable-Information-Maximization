@@ -1,0 +1,62 @@
+Using device: cuda
+[RIM] iterative initialization
+[RIM] info tensor: A=(2950, 200) blocks=2950 layout=59x50 candidates=200 levels=16
+[RIM] init setup: blocks=2950 (59x50), bands=200, levels=16, candidates=200, max_iters=20, tol=1e-06, scheduler=geometric, gate_solver=exact_fractional, device=cuda
+[RIM] init start partition=[(0, 8), (9, 17), (18, 27), (28, 37), (38, 47), (48, 58), (59, 70), (71, 82), (83, 94), (95, 107), (108, 121), (122, 135), (136, 150), (151, 166), (167, 182), (183, 199)] resolutions=[865, 1767, 2769, 3771, 4773, 5874, 7077, 8279, 9481, 10783, 12186, 13588, 15091, 16694, 18297, 20000]
+[RIM] init iter 1/20: solving gates
+[RIM] init iter 1/20: gate mean/min/max=0.3582/0.0000/1.0000; solving scheduler DP
+[RIM] init iter 1/20: objective=809072, improvement=n/a, partition=[(0, 8), (9, 16), (17, 25), (26, 38), (39, 49), (50, 59), (60, 69), (70, 79), (80, 90), (91, 103), (104, 117), (118, 131), (132, 145), (146, 162), (163, 179), (180, 199)], resolutions=[865, 1667, 2569, 3871, 4973, 5975, 6976, 7978, 9080, 10383, 11785, 13188, 14590, 16293, 17996, 20000]
+[RIM] init iter 2/20: solving gates
+[RIM] init iter 2/20: gate mean/min/max=0.3690/0.0000/1.0000; solving scheduler DP
+[RIM] init iter 2/20: objective=809418, improvement=346.494, partition=[(0, 8), (9, 16), (17, 25), (26, 38), (39, 49), (50, 59), (60, 69), (70, 79), (80, 90), (91, 103), (104, 117), (118, 131), (132, 145), (146, 162), (163, 179), (180, 199)], resolutions=[865, 1667, 2569, 3871, 4973, 5975, 6976, 7978, 9080, 10383, 11785, 13188, 14590, 16293, 17996, 20000]
+[RIM] init converged at iter 2: partition unchanged
+[RIM] init final: recomputing gates for selected partition
+[RIM] init final: objective=809418, partition=[(0, 8), (9, 16), (17, 25), (26, 38), (39, 49), (50, 59), (60, 69), (70, 79), (80, 90), (91, 103), (104, 117), (118, 131), (132, 145), (146, 162), (163, 179), (180, 199)], resolutions=[865, 1667, 2569, 3871, 4973, 5975, 6976, 7978, 9080, 10383, 11785, 13188, 14590, 16293, 17996, 20000]
+[RIM] selected partition: [(0, 8), (9, 16), (17, 25), (26, 38), (39, 49), (50, 59), (60, 69), (70, 79), (80, 90), (91, 103), (104, 117), (118, 131), (132, 145), (146, 162), (163, 179), (180, 199)]
+[RIM] selected resolutions: [865, 1667, 2569, 3871, 4973, 5975, 6976, 7978, 9080, 10383, 11785, 13188, 14590, 16293, 17996, 20000]
+[RIM] objective history: [809071.7730630859, 809418.2670273064, 809418.2670273064]
+[RIM] gate_mode=trainable_sigmoid fallback_mode=global_shared
+[RIM] avg gate per level: [1.0, 1.0, 0.7705, 0.3302, 0.3186, 0.3129, 0.3071, 0.2949, 0.2641, 0.2431, 0.2176, 0.1983, 0.1831, 0.1695, 0.1549, 0.1397]
+[RIM] active blocks per level@threshold: [2950, 2950, 2273, 974, 940, 923, 906, 870, 779, 717, 642, 585, 540, 500, 457, 412]
+Loaded shuffled image (uint8): 20000x23466
+Active hash parameters: 423,841,426
+Encoder trainable parameters: 536,918,144
+MLP trainable parameters: 21,123
+Total trainable parameters: 536,939,267
+[     1/31000] loss=0.093200  train_PSNR=10.31 dB  val_PSNR=10.59 dB  gate_mean=0.3889
+[  1000/31000] loss=0.000295  train_PSNR=35.30 dB  val_PSNR=35.41 dB  gate_mean=0.3839
+[  2000/31000] loss=0.000146  train_PSNR=38.34 dB  val_PSNR=38.31 dB  gate_mean=0.3744
+[  3000/31000] loss=0.000101  train_PSNR=39.96 dB  val_PSNR=39.87 dB  gate_mean=0.3672
+[  4000/31000] loss=0.000079  train_PSNR=41.04 dB  val_PSNR=41.02 dB  gate_mean=0.3621
+[  5000/31000] loss=0.000065  train_PSNR=41.87 dB  val_PSNR=41.79 dB  gate_mean=0.3584
+[  6000/31000] loss=0.000056  train_PSNR=42.52 dB  val_PSNR=42.58 dB  gate_mean=0.3556
+[  7000/31000] loss=0.000048  train_PSNR=43.20 dB  val_PSNR=43.25 dB  gate_mean=0.3533
+[  8000/31000] loss=0.000043  train_PSNR=43.66 dB  val_PSNR=43.59 dB  gate_mean=0.3514
+[  9000/31000] loss=0.000038  train_PSNR=44.24 dB  val_PSNR=44.14 dB  gate_mean=0.3499
+[ 10000/31000] loss=0.000034  train_PSNR=44.74 dB  val_PSNR=44.76 dB  gate_mean=0.3486
+[ 11000/31000] loss=0.000031  train_PSNR=45.08 dB  val_PSNR=45.00 dB  gate_mean=0.3475
+[ 12000/31000] loss=0.000027  train_PSNR=45.63 dB  val_PSNR=45.65 dB  gate_mean=0.3465
+[ 13000/31000] loss=0.000026  train_PSNR=45.91 dB  val_PSNR=45.86 dB  gate_mean=0.3457
+[ 14000/31000] loss=0.000023  train_PSNR=46.36 dB  val_PSNR=46.31 dB  gate_mean=0.3450
+[ 15000/31000] loss=0.000021  train_PSNR=46.71 dB  val_PSNR=46.64 dB  gate_mean=0.3445
+[ 16000/31000] loss=0.000019  train_PSNR=47.16 dB  val_PSNR=47.24 dB  gate_mean=0.3440
+[ 17000/31000] loss=0.000017  train_PSNR=47.58 dB  val_PSNR=47.61 dB  gate_mean=0.3435
+[ 18000/31000] loss=0.000016  train_PSNR=47.93 dB  val_PSNR=47.88 dB  gate_mean=0.3431
+[ 19000/31000] loss=0.000015  train_PSNR=48.26 dB  val_PSNR=48.24 dB  gate_mean=0.3428
+[ 20000/31000] loss=0.000014  train_PSNR=48.55 dB  val_PSNR=48.54 dB  gate_mean=0.3426
+[ 21000/31000] loss=0.000013  train_PSNR=48.82 dB  val_PSNR=48.82 dB  gate_mean=0.3423
+[ 22000/31000] loss=0.000012  train_PSNR=49.05 dB  val_PSNR=49.01 dB  gate_mean=0.3421
+[ 23000/31000] loss=0.000012  train_PSNR=49.26 dB  val_PSNR=49.21 dB  gate_mean=0.3420
+[ 24000/31000] loss=0.000011  train_PSNR=49.43 dB  val_PSNR=49.42 dB  gate_mean=0.3418
+[ 25000/31000] loss=0.000011  train_PSNR=49.56 dB  val_PSNR=49.56 dB  gate_mean=0.3417
+[ 26000/31000] loss=0.000011  train_PSNR=49.66 dB  val_PSNR=49.65 dB  gate_mean=0.3416
+[ 27000/31000] loss=0.000011  train_PSNR=49.74 dB  val_PSNR=49.73 dB  gate_mean=0.3416
+[ 28000/31000] loss=0.000010  train_PSNR=49.81 dB  val_PSNR=49.79 dB  gate_mean=0.3416
+[ 29000/31000] loss=0.000010  train_PSNR=49.83 dB  val_PSNR=49.82 dB  gate_mean=0.3415
+[ 30000/31000] loss=0.000010  train_PSNR=49.85 dB  val_PSNR=49.83 dB  gate_mean=0.3415
+[ 31000/31000] loss=0.000010  train_PSNR=49.84 dB  val_PSNR=49.83 dB  gate_mean=0.3415
+  with torch.cuda.amp.autocast(enabled=use_amp):
+Training time: 16723.46s
+Done.
+Metrics: PSNR(full)=49.4323 dB  MSE(full)=1.13964221e-05
+{'mse_full': 1.1396422122411387e-05, 'psnr_full': 49.432314729075756}

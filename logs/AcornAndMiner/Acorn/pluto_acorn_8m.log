@@ -1,0 +1,456 @@
+
+ImplicitAdaptivePatchNet(
+  (positional_encoding): PositionalEncoding()
+  (coord2features_net): FCBlock(
+    (net): Sequential(
+      (0): Sequential(
+        (0): Linear(in_features=63, out_features=439, bias=True)
+        (1): ReLU(inplace=True)
+      )
+      (1): Sequential(
+        (0): Linear(in_features=439, out_features=439, bias=True)
+        (1): ReLU(inplace=True)
+      )
+      (2): Sequential(
+        (0): Linear(in_features=439, out_features=439, bias=True)
+        (1): ReLU(inplace=True)
+      )
+      (3): Sequential(
+        (0): Linear(in_features=439, out_features=439, bias=True)
+        (1): ReLU(inplace=True)
+      )
+      (4): Sequential(
+        (0): Linear(in_features=439, out_features=439, bias=True)
+        (1): ReLU(inplace=True)
+      )
+      (5): Sequential(
+        (0): Linear(in_features=439, out_features=16384, bias=True)
+      )
+    )
+  )
+  (features2sample_net): FCBlock(
+    (net): Sequential(
+      (0): Sequential(
+        (0): Linear(in_features=16, out_features=64, bias=True)
+        (1): ReLU(inplace=True)
+      )
+      (1): Sequential(
+        (0): Linear(in_features=64, out_features=64, bias=True)
+        (1): ReLU(inplace=True)
+      )
+      (2): Sequential(
+        (0): Linear(in_features=64, out_features=3, bias=True)
+      )
+    )
+  )
+)
+libpng warning: iCCP: known incorrect sRGB profile
+{"model": "ACORN", "size": "8m", "parameters": 8015139, "resolution": [8000, 8000], "requested_steps": 31000, "metrics_every": 1000, "gpu": "Tesla V100-PCIE-32GB", "torch": "2.5.1+cu118", "target_vram_gib": 30.0, "profile_only": false}
+VRAM_PROBE {"label": "ACORN 8m shared batch, 256 patches", "batch": 87, "peak_device_gib": 4.0447998046875, "peak_allocated_gib": 3.0960888862609863, "fits_target": true, "oom": false}
+VRAM_BATCH {"label": "ACORN 8m shared batch, 256 patches", "target_gib": 30.0, "selected_batch": 87, "peak_device_gib": 4.0447998046875, "peak_allocated_gib": 3.0960888862609863, "available_batch": 87, "all_available_fit": true}
+VRAM_PROBE {"label": "ACORN 8m shared batch, 64 patches", "batch": 175, "peak_device_gib": 4.0740966796875, "peak_allocated_gib": 3.111420154571533, "fits_target": true, "oom": false}
+VRAM_BATCH {"label": "ACORN 8m shared batch, 64 patches", "target_gib": 30.0, "selected_batch": 175, "peak_device_gib": 4.0740966796875, "peak_allocated_gib": 3.111420154571533, "available_batch": 175, "all_available_fit": true}
+step=1/31000 loss=1.25504708 elapsed=0.3s samples=1960000 patches=64
+step=100/31000 loss=0.01513367 elapsed=29.9s samples=1960000 patches=64
+step=200/31000 loss=0.01132753 elapsed=59.9s samples=1960000 patches=64
+step=300/31000 loss=0.01031765 elapsed=89.7s samples=1960000 patches=64
+step=400/31000 loss=0.00961336 elapsed=119.6s samples=1960000 patches=64
+============================= Total patches:64, split/merge:64/0
+step=500/31000 loss=0.00912582 elapsed=149.7s samples=1960000 patches=64
+step=600/31000 loss=0.01788270 elapsed=190.4s samples=1937664 patches=256
+step=700/31000 loss=0.01299210 elapsed=230.5s samples=1937664 patches=256
+step=800/31000 loss=0.01075235 elapsed=270.4s samples=1937664 patches=256
+step=900/31000 loss=0.00951886 elapsed=310.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:22/88
+step=1000/31000 loss=0.00865024 elapsed=350.7s samples=1937664 patches=256
+METRICS {"step": 1000, "scale": -1, "parameters": 8015139, "mse": 0.016426461741195848, "psnr": 17.844559734948874, "ssim": 0.5178785821219958}
+step=1100/31000 loss=0.02132537 elapsed=466.7s samples=1937664 patches=256
+step=1200/31000 loss=0.01468112 elapsed=510.4s samples=1937664 patches=256
+step=1300/31000 loss=0.01173479 elapsed=554.2s samples=1937664 patches=256
+step=1400/31000 loss=0.00995663 elapsed=595.2s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=1500/31000 loss=0.00877458 elapsed=634.1s samples=1937664 patches=256
+step=1600/31000 loss=0.00784616 elapsed=672.3s samples=1937664 patches=256
+step=1700/31000 loss=0.00711240 elapsed=710.4s samples=1937664 patches=256
+step=1800/31000 loss=0.00656336 elapsed=748.5s samples=1937664 patches=256
+step=1900/31000 loss=0.00607959 elapsed=786.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=2000/31000 loss=0.00568275 elapsed=824.9s samples=1937664 patches=256
+METRICS {"step": 2000, "scale": -1, "parameters": 8015139, "mse": 0.0010568450307704004, "psnr": 29.75988690285227, "ssim": 0.7951550704686332}
+step=2100/31000 loss=0.00534993 elapsed=936.7s samples=1937664 patches=256
+step=2200/31000 loss=0.00504105 elapsed=978.3s samples=1937664 patches=256
+step=2300/31000 loss=0.00478262 elapsed=1019.6s samples=1937664 patches=256
+step=2400/31000 loss=0.00454043 elapsed=1060.9s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=2500/31000 loss=0.00434067 elapsed=1102.1s samples=1937664 patches=256
+step=2600/31000 loss=0.00416975 elapsed=1143.3s samples=1937664 patches=256
+step=2700/31000 loss=0.00397722 elapsed=1184.4s samples=1937664 patches=256
+step=2800/31000 loss=0.00383480 elapsed=1225.6s samples=1937664 patches=256
+step=2900/31000 loss=0.00371390 elapsed=1266.7s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=3000/31000 loss=0.00358445 elapsed=1308.0s samples=1937664 patches=256
+METRICS {"step": 3000, "scale": -1, "parameters": 8015139, "mse": 0.0007490233639692828, "psnr": 31.255046353249924, "ssim": 0.8326630831124219}
+step=3100/31000 loss=0.00347763 elapsed=1375.9s samples=1937664 patches=256
+step=3200/31000 loss=0.00337332 elapsed=1417.0s samples=1937664 patches=256
+step=3300/31000 loss=0.00326868 elapsed=1458.2s samples=1937664 patches=256
+step=3400/31000 loss=0.00317905 elapsed=1499.3s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=3500/31000 loss=0.00308883 elapsed=1540.8s samples=1937664 patches=256
+step=3600/31000 loss=0.00301160 elapsed=1581.9s samples=1937664 patches=256
+step=3700/31000 loss=0.00295003 elapsed=1623.0s samples=1937664 patches=256
+step=3800/31000 loss=0.00288309 elapsed=1664.1s samples=1937664 patches=256
+step=3900/31000 loss=0.00280138 elapsed=1705.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=4000/31000 loss=0.00289276 elapsed=1747.6s samples=1937664 patches=256
+METRICS {"step": 4000, "scale": -1, "parameters": 8015139, "mse": 0.0006214789209016066, "psnr": 32.06573597016486, "ssim": 0.8652278398820454}
+step=4100/31000 loss=0.00270081 elapsed=1814.5s samples=1937664 patches=256
+step=4200/31000 loss=0.00266855 elapsed=1855.6s samples=1937664 patches=256
+step=4300/31000 loss=0.00258370 elapsed=1896.7s samples=1937664 patches=256
+step=4400/31000 loss=0.00255313 elapsed=1937.7s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=4500/31000 loss=0.00249082 elapsed=1979.2s samples=1937664 patches=256
+step=4600/31000 loss=0.00244359 elapsed=2021.1s samples=1937664 patches=256
+step=4700/31000 loss=0.00240566 elapsed=2063.0s samples=1937664 patches=256
+step=4800/31000 loss=0.00238224 elapsed=2104.1s samples=1937664 patches=256
+step=4900/31000 loss=0.00232719 elapsed=2145.2s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=5000/31000 loss=0.00229422 elapsed=2186.3s samples=1937664 patches=256
+METRICS {"step": 5000, "scale": -1, "parameters": 8015139, "mse": 0.0005208189220671715, "psnr": 32.833132456378756, "ssim": 0.8787331275277636}
+step=5100/31000 loss=0.00226142 elapsed=2254.0s samples=1937664 patches=256
+step=5200/31000 loss=0.00223365 elapsed=2295.0s samples=1937664 patches=256
+step=5300/31000 loss=0.00221981 elapsed=2336.0s samples=1937664 patches=256
+step=5400/31000 loss=0.00229818 elapsed=2377.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=5500/31000 loss=0.00213834 elapsed=2418.2s samples=1937664 patches=256
+step=5600/31000 loss=0.00211292 elapsed=2459.3s samples=1937664 patches=256
+step=5700/31000 loss=0.00211149 elapsed=2500.4s samples=1937664 patches=256
+step=5800/31000 loss=0.00205785 elapsed=2541.4s samples=1937664 patches=256
+step=5900/31000 loss=0.00206659 elapsed=2582.4s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=6000/31000 loss=0.00202081 elapsed=2623.6s samples=1937664 patches=256
+METRICS {"step": 6000, "scale": -1, "parameters": 8015139, "mse": 0.00046818509585717585, "psnr": 33.29582415692816, "ssim": 0.8838178434309144}
+step=6100/31000 loss=0.00198778 elapsed=2691.4s samples=1937664 patches=256
+step=6200/31000 loss=0.00198244 elapsed=2732.4s samples=1937664 patches=256
+step=6300/31000 loss=0.00200037 elapsed=2773.6s samples=1937664 patches=256
+step=6400/31000 loss=0.00196228 elapsed=2814.8s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=6500/31000 loss=0.00191782 elapsed=2856.1s samples=1937664 patches=256
+step=6600/31000 loss=0.00188614 elapsed=2897.1s samples=1937664 patches=256
+step=6700/31000 loss=0.00191161 elapsed=2938.1s samples=1937664 patches=256
+step=6800/31000 loss=0.00187638 elapsed=2979.5s samples=1937664 patches=256
+step=6900/31000 loss=0.00189384 elapsed=3020.7s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=7000/31000 loss=0.00205264 elapsed=3062.0s samples=1937664 patches=256
+METRICS {"step": 7000, "scale": -1, "parameters": 8015139, "mse": 0.00044964999793663463, "psnr": 33.47125404243423, "ssim": 0.8978678392056609}
+step=7100/31000 loss=0.00180096 elapsed=3128.9s samples=1937664 patches=256
+step=7200/31000 loss=0.00179862 elapsed=3170.2s samples=1937664 patches=256
+step=7300/31000 loss=0.00176761 elapsed=3211.6s samples=1937664 patches=256
+step=7400/31000 loss=0.00175724 elapsed=3252.9s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=7500/31000 loss=0.00184128 elapsed=3294.3s samples=1937664 patches=256
+step=7600/31000 loss=0.00172760 elapsed=3335.6s samples=1937664 patches=256
+step=7700/31000 loss=0.00172342 elapsed=3376.7s samples=1937664 patches=256
+step=7800/31000 loss=0.00182682 elapsed=3417.8s samples=1937664 patches=256
+step=7900/31000 loss=0.00170560 elapsed=3459.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=8000/31000 loss=0.00168701 elapsed=3500.1s samples=1937664 patches=256
+METRICS {"step": 8000, "scale": -1, "parameters": 8015139, "mse": 0.0004010875166003358, "psnr": 33.96760854737269, "ssim": 0.879801944459063}
+step=8100/31000 loss=0.00170169 elapsed=3567.9s samples=1937664 patches=256
+step=8200/31000 loss=0.00171295 elapsed=3608.9s samples=1937664 patches=256
+step=8300/31000 loss=0.00191159 elapsed=3650.2s samples=1937664 patches=256
+step=8400/31000 loss=0.00199264 elapsed=3691.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=8500/31000 loss=0.00162581 elapsed=3733.1s samples=1937664 patches=256
+step=8600/31000 loss=0.00177913 elapsed=3774.4s samples=1937664 patches=256
+step=8700/31000 loss=0.00160393 elapsed=3815.6s samples=1937664 patches=256
+step=8800/31000 loss=0.00158704 elapsed=3856.5s samples=1937664 patches=256
+step=8900/31000 loss=0.00172367 elapsed=3898.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=9000/31000 loss=0.00158348 elapsed=3940.0s samples=1937664 patches=256
+METRICS {"step": 9000, "scale": -1, "parameters": 8015139, "mse": 0.0003763822855503682, "psnr": 34.24370824853614, "ssim": 0.9067952829364463}
+step=9100/31000 loss=0.00168002 elapsed=4008.6s samples=1937664 patches=256
+step=9200/31000 loss=0.00157228 elapsed=4050.5s samples=1937664 patches=256
+step=9300/31000 loss=0.00158721 elapsed=4092.4s samples=1937664 patches=256
+step=9400/31000 loss=0.00161221 elapsed=4134.3s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=9500/31000 loss=0.00154104 elapsed=4176.3s samples=1937664 patches=256
+step=9600/31000 loss=0.00153373 elapsed=4218.4s samples=1937664 patches=256
+step=9700/31000 loss=0.00151823 elapsed=4260.3s samples=1937664 patches=256
+step=9800/31000 loss=0.00151690 elapsed=4302.1s samples=1937664 patches=256
+step=9900/31000 loss=0.00150608 elapsed=4344.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=10000/31000 loss=0.00153360 elapsed=4386.0s samples=1937664 patches=256
+METRICS {"step": 10000, "scale": -1, "parameters": 8015139, "mse": 0.00036732631254793205, "psnr": 34.34947960886738, "ssim": 0.9061605262065391}
+step=10100/31000 loss=0.00149012 elapsed=4454.6s samples=1937664 patches=256
+step=10200/31000 loss=0.00147889 elapsed=4496.1s samples=1937664 patches=256
+step=10300/31000 loss=0.00146839 elapsed=4537.6s samples=1937664 patches=256
+step=10400/31000 loss=0.00147906 elapsed=4579.2s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=10500/31000 loss=0.00145447 elapsed=4620.8s samples=1937664 patches=256
+step=10600/31000 loss=0.00145356 elapsed=4662.3s samples=1937664 patches=256
+step=10700/31000 loss=0.00150382 elapsed=4704.2s samples=1937664 patches=256
+step=10800/31000 loss=0.00144549 elapsed=4745.9s samples=1937664 patches=256
+step=10900/31000 loss=0.00145359 elapsed=4787.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=11000/31000 loss=0.00143221 elapsed=4829.3s samples=1937664 patches=256
+METRICS {"step": 11000, "scale": -1, "parameters": 8015139, "mse": 0.0003460269629926591, "psnr": 34.60890058945117, "ssim": 0.9117657022415245}
+step=11100/31000 loss=0.00143300 elapsed=4896.8s samples=1937664 patches=256
+step=11200/31000 loss=0.00141528 elapsed=4937.7s samples=1937664 patches=256
+step=11300/31000 loss=0.00142149 elapsed=4979.3s samples=1937664 patches=256
+step=11400/31000 loss=0.00143533 elapsed=5021.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=11500/31000 loss=0.00141956 elapsed=5062.7s samples=1937664 patches=256
+step=11600/31000 loss=0.00140001 elapsed=5104.3s samples=1937664 patches=256
+step=11700/31000 loss=0.00149687 elapsed=5146.1s samples=1937664 patches=256
+step=11800/31000 loss=0.00139481 elapsed=5187.9s samples=1937664 patches=256
+step=11900/31000 loss=0.00140225 elapsed=5229.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=12000/31000 loss=0.00150031 elapsed=5271.4s samples=1937664 patches=256
+METRICS {"step": 12000, "scale": -1, "parameters": 8015139, "mse": 0.00037745676530662203, "psnr": 34.231327861912824, "ssim": 0.7601719596143782}
+step=12100/31000 loss=0.00136904 elapsed=5338.6s samples=1937664 patches=256
+step=12200/31000 loss=0.00136193 elapsed=5380.3s samples=1937664 patches=256
+step=12300/31000 loss=0.00135807 elapsed=5421.9s samples=1937664 patches=256
+step=12400/31000 loss=0.00135921 elapsed=5463.5s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=12500/31000 loss=0.00136750 elapsed=5505.2s samples=1937664 patches=256
+step=12600/31000 loss=0.00151534 elapsed=5546.8s samples=1937664 patches=256
+step=12700/31000 loss=0.00135604 elapsed=5588.5s samples=1937664 patches=256
+step=12800/31000 loss=0.00133943 elapsed=5630.2s samples=1937664 patches=256
+step=12900/31000 loss=0.00133541 elapsed=5671.8s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=13000/31000 loss=0.00133162 elapsed=5713.7s samples=1937664 patches=256
+METRICS {"step": 13000, "scale": -1, "parameters": 8015139, "mse": 0.00032205192781695327, "psnr": 34.92074096794488, "ssim": 0.9139229907917954}
+step=13100/31000 loss=0.00132565 elapsed=5782.8s samples=1937664 patches=256
+step=13200/31000 loss=0.00132723 elapsed=5824.5s samples=1937664 patches=256
+step=13300/31000 loss=0.00132126 elapsed=5866.1s samples=1937664 patches=256
+step=13400/31000 loss=0.00131912 elapsed=5907.8s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=13500/31000 loss=0.00131743 elapsed=5949.7s samples=1937664 patches=256
+step=13600/31000 loss=0.00131998 elapsed=5991.3s samples=1937664 patches=256
+step=13700/31000 loss=0.00131730 elapsed=6033.0s samples=1937664 patches=256
+step=13800/31000 loss=0.00142859 elapsed=6074.8s samples=1937664 patches=256
+step=13900/31000 loss=0.00129539 elapsed=6116.5s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=14000/31000 loss=0.00129115 elapsed=6158.3s samples=1937664 patches=256
+METRICS {"step": 14000, "scale": -1, "parameters": 8015139, "mse": 0.00031437638525533274, "psnr": 35.02550083938219, "ssim": 0.91321004616954}
+step=14100/31000 loss=0.00129481 elapsed=6225.3s samples=1937664 patches=256
+step=14200/31000 loss=0.00137465 elapsed=6267.0s samples=1937664 patches=256
+step=14300/31000 loss=0.00130222 elapsed=6308.7s samples=1937664 patches=256
+step=14400/31000 loss=0.00131326 elapsed=6350.3s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=14500/31000 loss=0.00129345 elapsed=6392.1s samples=1937664 patches=256
+step=14600/31000 loss=0.00127509 elapsed=6433.8s samples=1937664 patches=256
+step=14700/31000 loss=0.00129874 elapsed=6475.5s samples=1937664 patches=256
+step=14800/31000 loss=0.00127592 elapsed=6517.3s samples=1937664 patches=256
+step=14900/31000 loss=0.00129310 elapsed=6559.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=15000/31000 loss=0.00125869 elapsed=6600.8s samples=1937664 patches=256
+METRICS {"step": 15000, "scale": -1, "parameters": 8015139, "mse": 0.00030573915089071184, "psnr": 35.146489448947634, "ssim": 0.9219523247362681}
+step=15100/31000 loss=0.00128042 elapsed=6668.8s samples=1937664 patches=256
+step=15200/31000 loss=0.00125888 elapsed=6710.6s samples=1937664 patches=256
+step=15300/31000 loss=0.00125602 elapsed=6752.3s samples=1937664 patches=256
+step=15400/31000 loss=0.00128640 elapsed=6794.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=15500/31000 loss=0.00128281 elapsed=6835.9s samples=1937664 patches=256
+step=15600/31000 loss=0.00129085 elapsed=6878.0s samples=1937664 patches=256
+step=15700/31000 loss=0.00129496 elapsed=6917.0s samples=1937664 patches=256
+step=15800/31000 loss=0.00124760 elapsed=6956.2s samples=1937664 patches=256
+step=15900/31000 loss=0.00125694 elapsed=6995.4s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=16000/31000 loss=0.00129754 elapsed=7034.8s samples=1937664 patches=256
+METRICS {"step": 16000, "scale": -1, "parameters": 8015139, "mse": 0.0003175116312894074, "psnr": 34.9824036072702, "ssim": 0.9048933271891785}
+step=16100/31000 loss=0.00124081 elapsed=7101.1s samples=1937664 patches=256
+step=16200/31000 loss=0.00124400 elapsed=7140.0s samples=1937664 patches=256
+step=16300/31000 loss=0.00124598 elapsed=7179.0s samples=1937664 patches=256
+step=16400/31000 loss=0.00122624 elapsed=7218.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=16500/31000 loss=0.00125028 elapsed=7257.1s samples=1937664 patches=256
+step=16600/31000 loss=0.00122909 elapsed=7296.1s samples=1937664 patches=256
+step=16700/31000 loss=0.00124108 elapsed=7335.1s samples=1937664 patches=256
+step=16800/31000 loss=0.00121334 elapsed=7374.3s samples=1937664 patches=256
+step=16900/31000 loss=0.00122147 elapsed=7413.3s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=17000/31000 loss=0.00122510 elapsed=7452.4s samples=1937664 patches=256
+METRICS {"step": 17000, "scale": -1, "parameters": 8015139, "mse": 0.00029674710547741184, "psnr": 35.27613508536197, "ssim": 0.9265978540332777}
+step=17100/31000 loss=0.00124850 elapsed=7517.3s samples=1937664 patches=256
+step=17200/31000 loss=0.00120615 elapsed=7556.4s samples=1937664 patches=256
+step=17300/31000 loss=0.00120810 elapsed=7595.4s samples=1937664 patches=256
+step=17400/31000 loss=0.00120702 elapsed=7634.4s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=17500/31000 loss=0.00129288 elapsed=7673.5s samples=1937664 patches=256
+step=17600/31000 loss=0.00123217 elapsed=7712.6s samples=1937664 patches=256
+step=17700/31000 loss=0.00119392 elapsed=7751.6s samples=1937664 patches=256
+step=17800/31000 loss=0.00129334 elapsed=7790.7s samples=1937664 patches=256
+step=17900/31000 loss=0.00121568 elapsed=7829.8s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=18000/31000 loss=0.00119312 elapsed=7868.9s samples=1937664 patches=256
+METRICS {"step": 18000, "scale": -1, "parameters": 8015139, "mse": 0.00028898710356966515, "psnr": 35.391215377745986, "ssim": 0.9273949860837963}
+step=18100/31000 loss=0.00118932 elapsed=7933.2s samples=1937664 patches=256
+step=18200/31000 loss=0.00120300 elapsed=7972.0s samples=1937664 patches=256
+step=18300/31000 loss=0.00120456 elapsed=8010.7s samples=1937664 patches=256
+step=18400/31000 loss=0.00119244 elapsed=8049.5s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=18500/31000 loss=0.00120935 elapsed=8088.3s samples=1937664 patches=256
+step=18600/31000 loss=0.00126452 elapsed=8127.0s samples=1937664 patches=256
+step=18700/31000 loss=0.00117367 elapsed=8165.7s samples=1937664 patches=256
+step=18800/31000 loss=0.00121148 elapsed=8204.5s samples=1937664 patches=256
+step=18900/31000 loss=0.00123139 elapsed=8243.3s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=19000/31000 loss=0.00120093 elapsed=8282.1s samples=1937664 patches=256
+METRICS {"step": 19000, "scale": -1, "parameters": 8015139, "mse": 0.00029359284312850946, "psnr": 35.32254535362505, "ssim": 0.9014898124708445}
+step=19100/31000 loss=0.00117939 elapsed=8346.8s samples=1937664 patches=256
+step=19200/31000 loss=0.00117079 elapsed=8385.5s samples=1937664 patches=256
+step=19300/31000 loss=0.00116508 elapsed=8424.2s samples=1937664 patches=256
+step=19400/31000 loss=0.00117749 elapsed=8463.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=19500/31000 loss=0.00117761 elapsed=8501.8s samples=1937664 patches=256
+step=19600/31000 loss=0.00117944 elapsed=8540.5s samples=1937664 patches=256
+step=19700/31000 loss=0.00116155 elapsed=8579.2s samples=1937664 patches=256
+step=19800/31000 loss=0.00117043 elapsed=8617.9s samples=1937664 patches=256
+step=19900/31000 loss=0.00136092 elapsed=8656.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=20000/31000 loss=0.00120412 elapsed=8695.6s samples=1937664 patches=256
+METRICS {"step": 20000, "scale": -1, "parameters": 8015139, "mse": 0.00029061691458809774, "psnr": 35.366791123418665, "ssim": 0.9106045187253013}
+step=20100/31000 loss=0.00119438 elapsed=8761.1s samples=1937664 patches=256
+step=20200/31000 loss=0.00116914 elapsed=8799.8s samples=1937664 patches=256
+step=20300/31000 loss=0.00116245 elapsed=8838.6s samples=1937664 patches=256
+step=20400/31000 loss=0.00116565 elapsed=8877.4s samples=1937664 patches=256
+============================= Total patches:256, split/merge:1/4
+step=20500/31000 loss=0.00115321 elapsed=8916.3s samples=1937664 patches=256
+step=20600/31000 loss=0.00271224 elapsed=8954.9s samples=1937664 patches=256
+step=20700/31000 loss=0.00187760 elapsed=8993.5s samples=1937664 patches=256
+step=20800/31000 loss=0.00159668 elapsed=9032.2s samples=1937664 patches=256
+step=20900/31000 loss=0.00146792 elapsed=9070.8s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=21000/31000 loss=0.00138976 elapsed=9109.7s samples=1937664 patches=256
+METRICS {"step": 21000, "scale": -1, "parameters": 8015139, "mse": 0.0003392487956457383, "psnr": 34.6948168543783, "ssim": 0.9072885937090711}
+step=21100/31000 loss=0.00133771 elapsed=9174.6s samples=1937664 patches=256
+step=21200/31000 loss=0.00130005 elapsed=9213.3s samples=1937664 patches=256
+step=21300/31000 loss=0.00127562 elapsed=9252.0s samples=1937664 patches=256
+step=21400/31000 loss=0.00125259 elapsed=9290.7s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=21500/31000 loss=0.00123853 elapsed=9329.5s samples=1937664 patches=256
+step=21600/31000 loss=0.00122444 elapsed=9368.2s samples=1937664 patches=256
+step=21700/31000 loss=0.00120926 elapsed=9406.9s samples=1937664 patches=256
+step=21800/31000 loss=0.00120156 elapsed=9445.5s samples=1937664 patches=256
+step=21900/31000 loss=0.00119357 elapsed=9484.2s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=22000/31000 loss=0.00118712 elapsed=9523.1s samples=1937664 patches=256
+METRICS {"step": 22000, "scale": -1, "parameters": 8015139, "mse": 0.000290982089770181, "psnr": 35.36133741437998, "ssim": 0.916829518834094}
+step=22100/31000 loss=0.00118454 elapsed=9587.4s samples=1937664 patches=256
+step=22200/31000 loss=0.00117689 elapsed=9626.0s samples=1937664 patches=256
+step=22300/31000 loss=0.00117201 elapsed=9664.6s samples=1937664 patches=256
+step=22400/31000 loss=0.00123344 elapsed=9703.3s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=22500/31000 loss=0.00116623 elapsed=9742.0s samples=1937664 patches=256
+step=22600/31000 loss=0.00115119 elapsed=9780.7s samples=1937664 patches=256
+step=22700/31000 loss=0.00115551 elapsed=9819.3s samples=1937664 patches=256
+step=22800/31000 loss=0.00118411 elapsed=9857.9s samples=1937664 patches=256
+step=22900/31000 loss=0.00114542 elapsed=9896.9s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=23000/31000 loss=0.00113990 elapsed=9935.9s samples=1937664 patches=256
+METRICS {"step": 23000, "scale": -1, "parameters": 8015139, "mse": 0.00027708768292998635, "psnr": 35.57382778997379, "ssim": 0.9282898696950743}
+step=23100/31000 loss=0.00113610 elapsed=10001.1s samples=1937664 patches=256
+step=23200/31000 loss=0.00112949 elapsed=10039.8s samples=1937664 patches=256
+step=23300/31000 loss=0.00113145 elapsed=10078.5s samples=1937664 patches=256
+step=23400/31000 loss=0.00112854 elapsed=10117.2s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=23500/31000 loss=0.00112446 elapsed=10156.0s samples=1937664 patches=256
+step=23600/31000 loss=0.00115320 elapsed=10194.8s samples=1937664 patches=256
+step=23700/31000 loss=0.00111473 elapsed=10233.5s samples=1937664 patches=256
+step=23800/31000 loss=0.00119185 elapsed=10272.2s samples=1937664 patches=256
+step=23900/31000 loss=0.00111333 elapsed=10310.9s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=24000/31000 loss=0.00129153 elapsed=10349.8s samples=1937664 patches=256
+METRICS {"step": 24000, "scale": -1, "parameters": 8015139, "mse": 0.0002873047292716894, "psnr": 35.41657225105534, "ssim": 0.9009296112936318}
+step=24100/31000 loss=0.00111080 elapsed=10415.3s samples=1937664 patches=256
+step=24200/31000 loss=0.00117806 elapsed=10454.0s samples=1937664 patches=256
+step=24300/31000 loss=0.00113267 elapsed=10492.7s samples=1937664 patches=256
+step=24400/31000 loss=0.00115797 elapsed=10531.4s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=24500/31000 loss=0.00111043 elapsed=10570.2s samples=1937664 patches=256
+step=24600/31000 loss=0.00109454 elapsed=10608.9s samples=1937664 patches=256
+step=24700/31000 loss=0.00111572 elapsed=10647.6s samples=1937664 patches=256
+step=24800/31000 loss=0.00109605 elapsed=10686.2s samples=1937664 patches=256
+step=24900/31000 loss=0.00108823 elapsed=10724.9s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=25000/31000 loss=0.00108849 elapsed=10763.6s samples=1937664 patches=256
+METRICS {"step": 25000, "scale": -1, "parameters": 8015139, "mse": 0.00026485361174991516, "psnr": 35.76994100310551, "ssim": 0.9317234784988719}
+step=25100/31000 loss=0.00108573 elapsed=10828.7s samples=1937664 patches=256
+step=25200/31000 loss=0.00108389 elapsed=10867.4s samples=1937664 patches=256
+step=25300/31000 loss=0.00108570 elapsed=10906.0s samples=1937664 patches=256
+step=25400/31000 loss=0.00111262 elapsed=10944.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=25500/31000 loss=0.00108776 elapsed=10983.4s samples=1937664 patches=256
+step=25600/31000 loss=0.00108529 elapsed=11022.0s samples=1937664 patches=256
+step=25700/31000 loss=0.00114414 elapsed=11060.7s samples=1937664 patches=256
+step=25800/31000 loss=0.00109260 elapsed=11099.3s samples=1937664 patches=256
+step=25900/31000 loss=0.00110466 elapsed=11138.0s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=26000/31000 loss=0.00107458 elapsed=11176.8s samples=1937664 patches=256
+METRICS {"step": 26000, "scale": -1, "parameters": 8015139, "mse": 0.000261873747622529, "psnr": 35.8190803664209, "ssim": 0.9286013278374269}
+step=26100/31000 loss=0.00107454 elapsed=11242.3s samples=1937664 patches=256
+step=26200/31000 loss=0.00106778 elapsed=11280.9s samples=1937664 patches=256
+step=26300/31000 loss=0.00106505 elapsed=11319.6s samples=1937664 patches=256
+step=26400/31000 loss=0.00106491 elapsed=11358.2s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=26500/31000 loss=0.00109090 elapsed=11397.0s samples=1937664 patches=256
+step=26600/31000 loss=0.00111342 elapsed=11435.6s samples=1937664 patches=256
+step=26700/31000 loss=0.00108852 elapsed=11474.3s samples=1937664 patches=256
+step=26800/31000 loss=0.00107069 elapsed=11512.9s samples=1937664 patches=256
+step=26900/31000 loss=0.00108307 elapsed=11551.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=27000/31000 loss=0.00105720 elapsed=11590.3s samples=1937664 patches=256
+METRICS {"step": 27000, "scale": -1, "parameters": 8015139, "mse": 0.000257593552095016, "psnr": 35.89065012137542, "ssim": 0.9332396926350558}
+step=27100/31000 loss=0.00105640 elapsed=11655.7s samples=1937664 patches=256
+step=27200/31000 loss=0.00105437 elapsed=11694.5s samples=1937664 patches=256
+step=27300/31000 loss=0.00105199 elapsed=11733.1s samples=1937664 patches=256
+step=27400/31000 loss=0.00105771 elapsed=11771.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=27500/31000 loss=0.00117915 elapsed=11810.3s samples=1937664 patches=256
+step=27600/31000 loss=0.00106679 elapsed=11848.9s samples=1937664 patches=256
+step=27700/31000 loss=0.00105200 elapsed=11887.4s samples=1937664 patches=256
+step=27800/31000 loss=0.00104855 elapsed=11926.0s samples=1937664 patches=256
+step=27900/31000 loss=0.00105094 elapsed=11964.5s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=28000/31000 loss=0.00105262 elapsed=12003.2s samples=1937664 patches=256
+METRICS {"step": 28000, "scale": -1, "parameters": 8015139, "mse": 0.0002550952893928672, "psnr": 35.93297561027893, "ssim": 0.9351033576291794}
+step=28100/31000 loss=0.00104765 elapsed=12067.9s samples=1937664 patches=256
+step=28200/31000 loss=0.00105048 elapsed=12106.7s samples=1937664 patches=256
+step=28300/31000 loss=0.00104396 elapsed=12145.4s samples=1937664 patches=256
+step=28400/31000 loss=0.00103958 elapsed=12184.1s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=28500/31000 loss=0.00109099 elapsed=12222.9s samples=1937664 patches=256
+step=28600/31000 loss=0.00103868 elapsed=12261.5s samples=1937664 patches=256
+step=28700/31000 loss=0.00115353 elapsed=12300.2s samples=1937664 patches=256
+step=28800/31000 loss=0.00112031 elapsed=12338.9s samples=1937664 patches=256
+step=28900/31000 loss=0.00104027 elapsed=12377.6s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=29000/31000 loss=0.00106806 elapsed=12416.4s samples=1937664 patches=256
+METRICS {"step": 29000, "scale": -1, "parameters": 8015139, "mse": 0.00025777616925671133, "psnr": 35.88757234533781, "ssim": 0.9354423247435578}
+step=29100/31000 loss=0.00103598 elapsed=12480.0s samples=1937664 patches=256
+step=29200/31000 loss=0.00103395 elapsed=12518.4s samples=1937664 patches=256
+step=29300/31000 loss=0.00104583 elapsed=12557.0s samples=1937664 patches=256
+step=29400/31000 loss=0.00103332 elapsed=12595.4s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=29500/31000 loss=0.00102771 elapsed=12633.9s samples=1937664 patches=256
+step=29600/31000 loss=0.00102558 elapsed=12672.3s samples=1937664 patches=256
+step=29700/31000 loss=0.00103394 elapsed=12710.6s samples=1937664 patches=256
+step=29800/31000 loss=0.00102952 elapsed=12749.0s samples=1937664 patches=256
+step=29900/31000 loss=0.00103397 elapsed=12787.4s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=30000/31000 loss=0.00103434 elapsed=12825.9s samples=1937664 patches=256
+METRICS {"step": 30000, "scale": -1, "parameters": 8015139, "mse": 0.000252279413381506, "psnr": 35.98118187530752, "ssim": 0.9294118178818529}
+step=30100/31000 loss=0.00102364 elapsed=12890.2s samples=1937664 patches=256
+step=30200/31000 loss=0.00102361 elapsed=12928.7s samples=1937664 patches=256
+step=30300/31000 loss=0.00102132 elapsed=12967.4s samples=1937664 patches=256
+step=30400/31000 loss=0.00102686 elapsed=13005.9s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=30500/31000 loss=0.00102495 elapsed=13044.5s samples=1937664 patches=256
+step=30600/31000 loss=0.00105120 elapsed=13083.0s samples=1937664 patches=256
+step=30700/31000 loss=0.00102206 elapsed=13121.5s samples=1937664 patches=256
+step=30800/31000 loss=0.00103812 elapsed=13159.9s samples=1937664 patches=256
+step=30900/31000 loss=0.00103383 elapsed=13198.4s samples=1937664 patches=256
+============================= Total patches:256, split/merge:0/0
+step=31000/31000 loss=0.00106235 elapsed=13237.0s samples=1937664 patches=256
+METRICS {"step": 31000, "scale": -1, "parameters": 8015139, "mse": 0.00025715056264575013, "psnr": 35.898125211049866, "ssim": 0.9362132250113814}
